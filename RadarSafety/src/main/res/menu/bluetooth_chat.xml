@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android = "http://schemas.android.com/apk/res/android"
+      xmlns:app = "http://schemas.android.com/apk/res-auto">
+
+    <item
+            android:id = "@+id/ShowBluetoothNameToOthers"
+            android:icon = "@drawable/bluetooth_disabled"
+            app:showAsAction = "ifRoom"
+            android:visible = "true"
+            android:title = "@string/secure_connect" />
+
+    <item
+            android:id = "@+id/StartAlert"
+            android:icon = "@drawable/start_24"
+            app:showAsAction = "ifRoom"
+            android:visible = "true"
+            android:title = "Start Alert" />
+
+    <item
+            android:id = "@+id/StopAlert"
+            android:icon = "@drawable/stop_24"
+            android:visible = "true"
+            app:showAsAction = "ifRoom"
+            android:title = "Stop Alert" />
+
+    <item
+            android:id = "@+id/Distance"
+            android:icon = "@drawable/distance"
+            android:visible = "true"
+            app:showAsAction = "ifRoom"
+            android:title = "Set Distance Threashold">
+        <menu xmlns:android = "http://schemas.android.com/apk/res/android">
+            <item
+                    android:id = "@+id/Five"
+                    android:visible = "true"
+                    app:showAsAction = "ifRoom"
+                    android:title = " 5 Meters" />
+            <item
+                    android:id = "@+id/Ten"
+                    android:visible = "true"
+                    app:showAsAction = "ifRoom"
+                    android:title = "10 Meters" />
+            <item
+                    android:id = "@+id/Fifteen"
+                    android:visible = "true"
+                    app:showAsAction = "ifRoom"
+                    android:title = "15 Meters" />
+            <item
+                    android:id = "@+id/Twenty"
+                    android:visible = "true"
+                    app:showAsAction = "ifRoom"
+                    android:title = "20  Meters" />
+            <item
+                    android:id = "@+id/TwentyFive"
+                    android:visible = "true"
+                    app:showAsAction = "ifRoom"
+                    android:title = "25 Meters" />
+        </menu>
+    </item>
+
+</menu>
