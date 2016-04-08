@@ -31,7 +31,7 @@ public class ExampleLoad3DSFile extends RendererActivity {
         monster = parser.getParsedObject();
         monster.scale().x = monster.scale().y = monster.scale().z = .5f;
         monster.position().y = -10;
-        scene.addChild(monster);
+        scene.addChild("Monster", monster);
 
         scene.camera().target = monster.position();
     }

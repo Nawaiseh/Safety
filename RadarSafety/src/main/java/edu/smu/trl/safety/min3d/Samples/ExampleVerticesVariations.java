@@ -5,6 +5,7 @@ package edu.smu.trl.safety.min3d.Samples;
  */
 
 import android.graphics.Bitmap;
+
 import edu.smu.trl.safety.min3d.Shared;
 import edu.smu.trl.safety.min3d.Utils;
 import edu.smu.trl.safety.min3d.core.Object3dContainer;
@@ -80,10 +81,10 @@ public class ExampleVerticesVariations extends RendererActivity {
         _cube4.defaultColor().setAll(0xffff0000);
         _cube4.position().y = -1.2f;
 
-        scene.addChild(_cube1);
-        scene.addChild(_cube2);
-        scene.addChild(_cube3);
-        scene.addChild(_cube4);
+        scene.addChild("Cube1", _cube1);
+        scene.addChild("Cube2", _cube2);
+        scene.addChild("Cube3", _cube3);
+        scene.addChild("Cube4", _cube4);
     }
 
     @Override

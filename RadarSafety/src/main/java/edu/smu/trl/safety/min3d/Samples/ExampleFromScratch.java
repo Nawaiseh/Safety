@@ -38,7 +38,7 @@ public class ExampleFromScratch extends RendererActivity {
             _currentObject.normalsEnabled(false);
             _currentObject.vertexColorsEnabled(true);
             _currentObject.doubleSidedEnabled(true);
-            scene.addChild(_currentObject);
+            scene.addChild(String.format("Object[%d]", _count), _currentObject);
         }
 
         addToObject();

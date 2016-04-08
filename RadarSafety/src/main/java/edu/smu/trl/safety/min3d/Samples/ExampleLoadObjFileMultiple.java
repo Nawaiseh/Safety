@@ -31,7 +31,7 @@ public class ExampleLoadObjFileMultiple extends RendererActivity {
         parser.parse();
 
         car = parser.getParsedObject();
-        scene.addChild(car);
+        scene.addChild("MyCar", car);
 
         tireRR = car.getChildByName("tire_rr");
         tireRF = car.getChildByName("tire_rf");

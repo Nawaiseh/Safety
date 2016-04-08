@@ -5,10 +5,11 @@ import android.bluetooth.BluetoothSocket;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import edu.smu.trl.safety.radarsafety.Renderer_Activity;
-import edu.smu.trl.safety.utilities.Log;
 
 import java.util.UUID;
+
+import edu.smu.trl.safety.radarsafety.Renderer_Activity;
+import edu.smu.trl.safety.utilities.Log;
 
 public class BluetoothChatService {
     // Constants that indicate the current connection state

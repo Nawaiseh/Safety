@@ -29,7 +29,7 @@ public class ExampleSubsetOfFaces extends RendererActivity {
         _cylinder.normalsEnabled(false);
         _cylinder.vertexColorsEnabled(true);
         _cylinder.doubleSidedEnabled(true);
-        scene.addChild(_cylinder);
+        scene.addChild("Cylinder", _cylinder);
 
         _cylinder.faces().renderSubsetEnabled(true);
 

@@ -4,12 +4,12 @@ package edu.smu.trl.safety.min3d.core;
  * Created by TRL on 3/4/2016.
  */
 
+import java.util.TreeMap;
+
 import edu.smu.trl.safety.min3d.interfaces.IObject3dContainer;
 
-import java.util.ArrayList;
-
 public class Object3dContainer extends Object3d implements IObject3dContainer {
-    protected ArrayList<Object3d> _children = new ArrayList<Object3d>();
+    protected TreeMap<String, Object3d> _children = new TreeMap<String, Object3d>();
 
     public Object3dContainer() {
         super(0, 0, false, false, false);
@@ -36,28 +36,21 @@ public class Object3dContainer extends Object3d implements IObject3dContainer {
         super($vertices, $faces, $textures);
     }
 
-    public void addChild(Object3d $o) {
-        _children.add($o);
+    public void addChild(String $Key, Object3d $o) {
+        _children.put($Key, $o);
 
         $o.parent(this);
         $o.scene(this.scene());
     }
 
-    public void addChildAt(Object3d $o, int $index) {
-        _children.add($index, $o);
 
-        $o.parent(this);
-        $o.scene(this.scene());
-    }
+    public void removeChild(String $Key) {
+        Object3d b = _children.remove($Key);
 
-    public boolean removeChild(Object3d $o) {
-        boolean b = _children.remove($o);
-
-        if (b) {
-            $o.parent(null);
-            $o.scene(null);
+        if (b != null) {
+            b.parent(null);
+            b.scene(null);
         }
-        return b;
     }
 
     public Object3d removeChildAt(int $index) {
@@ -77,15 +70,21 @@ public class Object3dContainer extends Object3d implements IObject3dContainer {
      * TODO: Use better lookup
      */
     public Object3d getChildByName(String $name) {
-        for (int i = 0; i < _children.size(); i++) {
-            if (_children.get(i).name().equals($name)) return _children.get(i);
+        try {
+            return _children.get($name);
+        } catch (Exception Exception) {
+            int x = 0;
         }
+
+  /*  for (int i = 0; i < _children.size(); i++) {
+            if (_children.get(i).name().equals($name)) return _children.get(i);
+        }*/
         return null;
     }
 
-    public int getChildIndexOf(Object3d $o) {
-        return _children.indexOf($o);
-    }
+    //public int getChildIndexOf(Object3d $o) {
+    //  return _children.indexOf($o);
+    // }
 
 
     public int numChildren() {
@@ -93,7 +92,7 @@ public class Object3dContainer extends Object3d implements IObject3dContainer {
     }
 
     /*package-private*/
-    ArrayList<Object3d> children() {
+    public TreeMap<String, Object3d> children() {
         return _children;
     }
 
@@ -115,10 +114,9 @@ public class Object3dContainer extends Object3d implements IObject3dContainer {
         clone.scale().y = scale().y;
         clone.scale().z = scale().z;
 
-        for (int i = 0; i < this.numChildren(); i++) {
-            clone.addChild(this.getChildAt(i));
+        for (String Key : this.children().keySet()) {
+            clone.addChild(Key, children().get(Key));
         }
-
         return clone;
     }
 

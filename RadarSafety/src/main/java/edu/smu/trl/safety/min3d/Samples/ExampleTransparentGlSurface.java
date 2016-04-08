@@ -8,6 +8,7 @@ package edu.smu.trl.safety.min3d.Samples;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.view.View;
+
 import edu.smu.trl.safety.min3d.core.RendererActivity;
 import edu.smu.trl.safety.min3d.objectPrimitives.Box;
 import edu.smu.trl.safety.min3d.vos.Light;
@@ -58,7 +59,7 @@ public class ExampleTransparentGlSurface extends RendererActivity {
             box.rotation().x = (float) (Math.random() * 360);
             box.rotation().y = (float) (Math.random() * 360);
             boxes[i] = box;
-            scene.addChild(box);
+            scene.addChild("Box", box);
         }
     }
 

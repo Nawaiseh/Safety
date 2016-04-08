@@ -6,6 +6,7 @@ package edu.smu.trl.safety.min3d.Samples;
 
 
 import android.graphics.Bitmap;
+
 import edu.smu.trl.safety.min3d.Shared;
 import edu.smu.trl.safety.min3d.Utils;
 import edu.smu.trl.safety.min3d.core.RendererActivity;
@@ -44,7 +45,7 @@ public class ExampleFog extends RendererActivity {
             box.textures().addById("barong");
             box.vertexColorsEnabled(false);
             boxes[i] = box;
-            scene.addChild(box);
+            scene.addChild("Box", box);
         }
 
         Color4 planeColor = new Color4(255, 255, 255, 255);
@@ -79,10 +80,10 @@ public class ExampleFog extends RendererActivity {
         down.lightingEnabled(false);
         down.textures().addById("wood");
 
-        scene.addChild(east);
-        scene.addChild(west);
-        scene.addChild(up);
-        scene.addChild(down);
+        scene.addChild("East", east);
+        scene.addChild("West", west);
+        scene.addChild("Up", up);
+        scene.addChild("Down", down);
 
         scene.fogColor(new Color4(0, 0, 0, 255));
         scene.fogNear(10);

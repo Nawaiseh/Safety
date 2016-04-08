@@ -27,7 +27,7 @@ public class ExampleLoadMD2File extends RendererActivity {
         ogre.scale().x = ogre.scale().y = ogre.scale().z = .07f;
         ogre.rotation().z = -90;
         ogre.rotation().x = -90;
-        scene.addChild(ogre);
+        scene.addChild("Ogre", ogre);
         ogre.setFps(70);
         ogre.play();
     }

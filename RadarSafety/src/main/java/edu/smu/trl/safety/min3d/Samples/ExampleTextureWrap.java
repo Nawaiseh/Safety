@@ -6,6 +6,7 @@ package edu.smu.trl.safety.min3d.Samples;
 
 
 import android.graphics.Bitmap;
+
 import edu.smu.trl.safety.min3d.Shared;
 import edu.smu.trl.safety.min3d.Utils;
 import edu.smu.trl.safety.min3d.core.Object3dContainer;
@@ -29,7 +30,7 @@ public class ExampleTextureWrap extends RendererActivity {
         _object = new HollowCylinder(1f, 0.5f, 0.66f, 25);
         _object.normalsEnabled(false);
         _object.vertexColorsEnabled(false);
-        scene.addChild(_object);
+        scene.addChild("Object", _object);
 
         Bitmap b = Utils.makeBitmapFromResourceId(R.drawable.uglysquares);
         Shared.textureManager().addTextureId(b, "texture", true);

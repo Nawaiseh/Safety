@@ -6,6 +6,7 @@ package edu.smu.trl.safety.min3d.Samples;
 
 
 import android.view.MotionEvent;
+
 import edu.smu.trl.safety.min3d.Utils;
 import edu.smu.trl.safety.min3d.core.Object3dContainer;
 import edu.smu.trl.safety.min3d.core.RendererActivity;
@@ -25,7 +26,7 @@ public class ExampleCamera extends RendererActivity {
         cube = new Box(1.5f, 1.5f, 1.5f);
         cube.position().y = 0.75f;
         cube.normalsEnabled(false);
-        scene.addChild(cube);
+        scene.addChild("Cube1", cube);
 
         cube = new Box(0.8f, 0.8f, 0.8f);
         cube.position().y = 0.4f;
@@ -33,7 +34,7 @@ public class ExampleCamera extends RendererActivity {
         cube.position().z = 1.3f;
         cube.rotation().y = 45;
         cube.normalsEnabled(false);
-        scene.addChild(cube);
+        scene.addChild("Cube2", cube);
 
         // .. wow nice composition
 

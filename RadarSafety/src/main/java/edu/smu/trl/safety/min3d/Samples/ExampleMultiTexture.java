@@ -6,6 +6,9 @@ package edu.smu.trl.safety.min3d.Samples;
 
 
 import android.graphics.Bitmap;
+
+import javax.microedition.khronos.opengles.GL10;
+
 import edu.smu.trl.safety.min3d.Shared;
 import edu.smu.trl.safety.min3d.Utils;
 import edu.smu.trl.safety.min3d.core.Object3dContainer;
@@ -16,8 +19,6 @@ import edu.smu.trl.safety.min3d.vos.Light;
 import edu.smu.trl.safety.min3d.vos.TexEnvxVo;
 import edu.smu.trl.safety.min3d.vos.TextureVo;
 import edu.smu.trl.safety.radarsafety.R;
-
-import javax.microedition.khronos.opengles.GL10;
 
 /**
  * This is the most complex example, for now.
@@ -64,12 +65,12 @@ public class ExampleMultiTexture extends RendererActivity {
         _cube = new Box(1.3f, 1.3f, 1.3f);
         _cube.position().x = +0.4f;
         _cube.normalsEnabled(false);
-        scene.addChild(_cube);
+        scene.addChild("Cube", _cube);
 
         _sphere = new Sphere(.8f, 12, 9);
         _sphere.position().x = -0.2f;
         _sphere.position().z = 1f;
-        scene.addChild(_sphere);
+        scene.addChild("Sphere", _sphere);
 
         // Add textures in TextureManager
 

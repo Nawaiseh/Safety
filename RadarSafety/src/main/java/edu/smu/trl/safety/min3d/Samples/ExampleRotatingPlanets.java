@@ -6,6 +6,7 @@ package edu.smu.trl.safety.min3d.Samples;
 
 
 import android.graphics.Bitmap;
+
 import edu.smu.trl.safety.min3d.Shared;
 import edu.smu.trl.safety.min3d.Utils;
 import edu.smu.trl.safety.min3d.core.Object3dContainer;
@@ -40,18 +41,18 @@ public class ExampleRotatingPlanets extends RendererActivity {
 
         // Add Jupiter to scene
         _jupiter = new Sphere(0.8f, 15, 10, true, true, false);
-        scene.addChild(_jupiter);
+        scene.addChild("Jupiter", _jupiter);
 
         // Add Earth as a child of Jupiter
         _earth = new Sphere(0.4f, 12, 9, true, true, false);
         _earth.position().x = 1.6f;
         _earth.rotation().x = 23;
-        _jupiter.addChild(_earth);
+        _jupiter.addChild("Earth", _earth);
 
         // Add the Moon as a child of Earth
         _moon = new Sphere(0.2f, 10, 8, true, true, false);
         _moon.position().x = 0.6f;
-        _earth.addChild(_moon);
+        _earth.addChild("Moon", _moon);
 
         // Add textures to TextureManager
         Bitmap b = Utils.makeBitmapFromResourceId(this, R.drawable.jupiter);

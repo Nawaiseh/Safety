@@ -6,6 +6,9 @@ package edu.smu.trl.safety.min3d.Samples;
 
 
 import android.graphics.Bitmap;
+
+import javax.microedition.khronos.opengles.GL10;
+
 import edu.smu.trl.safety.min3d.Shared;
 import edu.smu.trl.safety.min3d.Utils;
 import edu.smu.trl.safety.min3d.core.Object3dContainer;
@@ -14,8 +17,6 @@ import edu.smu.trl.safety.min3d.objectPrimitives.Sphere;
 import edu.smu.trl.safety.min3d.vos.Light;
 import edu.smu.trl.safety.min3d.vos.TextureVo;
 import edu.smu.trl.safety.radarsafety.R;
-
-import javax.microedition.khronos.opengles.GL10;
 
 /**
  * Demonstrates use of offset properties of TextureVo.
@@ -40,7 +41,7 @@ public class ExampleTextureOffset extends RendererActivity {
         scene.lights().add(light);
 
         _earth = new Sphere(1.2f, 15, 10);
-        scene.addChild(_earth);
+        scene.addChild("Earth", _earth);
 
         Bitmap b = Utils.makeBitmapFromResourceId(this, R.drawable.earth);
         Shared.textureManager().addTextureId(b, "jupiter", false);

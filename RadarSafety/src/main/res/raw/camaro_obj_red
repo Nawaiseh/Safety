@@ -1,6 +1,6 @@
 # Blender3D v249 OBJ File:
 # www.blender3d.org
-mtllib camaro.mtl
+mtllib camaro.mtl_red
 v -0.713361 -0.795191 0.535875
 v -0.674138 0.530709 0.760514
 v -0.674138 -1.056065 0.779606

@@ -5,56 +5,61 @@
     <item
             android:id = "@+id/ShowBluetoothNameToOthers"
             android:icon = "@drawable/bluetooth_disabled"
-            app:showAsAction = "ifRoom"
+        android:title="@string/secure_connect"
             android:visible = "true"
-            android:title = "@string/secure_connect" />
+        app:showAsAction="ifRoom" />
 
     <item
             android:id = "@+id/StartAlert"
             android:icon = "@drawable/start_24"
-            app:showAsAction = "ifRoom"
+        android:title="Start Alert"
             android:visible = "true"
-            android:title = "Start Alert" />
+        app:showAsAction="ifRoom" />
 
     <item
             android:id = "@+id/StopAlert"
             android:icon = "@drawable/stop_24"
+        android:title="Stop Alert"
             android:visible = "true"
-            app:showAsAction = "ifRoom"
-            android:title = "Stop Alert" />
+        app:showAsAction="ifRoom" />
 
     <item
             android:id = "@+id/Distance"
             android:icon = "@drawable/distance"
+        android:title="Set Distance Threashold"
             android:visible = "true"
-            app:showAsAction = "ifRoom"
-            android:title = "Set Distance Threashold">
+        app:showAsAction="ifRoom">
         <menu xmlns:android = "http://schemas.android.com/apk/res/android">
             <item
+                android:id="@+id/Direction"
+                android:title="Enable Angle Rotation"
+                android:visible="true"
+                app:showAsAction="ifRoom" />
+            <item
                     android:id = "@+id/Five"
+                android:title=" 5 Meters"
                     android:visible = "true"
-                    app:showAsAction = "ifRoom"
-                    android:title = " 5 Meters" />
+                app:showAsAction="ifRoom" />
             <item
                     android:id = "@+id/Ten"
+                android:title="10 Meters"
                     android:visible = "true"
-                    app:showAsAction = "ifRoom"
-                    android:title = "10 Meters" />
+                app:showAsAction="ifRoom" />
             <item
                     android:id = "@+id/Fifteen"
+                android:title="15 Meters"
                     android:visible = "true"
-                    app:showAsAction = "ifRoom"
-                    android:title = "15 Meters" />
+                app:showAsAction="ifRoom" />
             <item
                     android:id = "@+id/Twenty"
+                android:title="20  Meters"
                     android:visible = "true"
-                    app:showAsAction = "ifRoom"
-                    android:title = "20  Meters" />
+                app:showAsAction="ifRoom" />
             <item
                     android:id = "@+id/TwentyFive"
+                android:title="25 Meters"
                     android:visible = "true"
-                    app:showAsAction = "ifRoom"
-                    android:title = "25 Meters" />
+                app:showAsAction="ifRoom" />
         </menu>
     </item>
 

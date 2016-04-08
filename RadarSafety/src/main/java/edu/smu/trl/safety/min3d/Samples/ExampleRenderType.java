@@ -19,7 +19,7 @@ public class ExampleRenderType extends RendererActivity {
     public void initScene() {
         _object = new Sphere(1f, 15, 10);
         _object.normalsEnabled(false); // .. allows vertex colors to show through
-        scene.addChild(_object);
+        scene.addChild("Object", _object);
 
         // ( btw, notice how the Scene contains no Lights)
 

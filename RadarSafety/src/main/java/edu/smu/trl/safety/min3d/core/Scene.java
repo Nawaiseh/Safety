@@ -6,6 +6,9 @@ package edu.smu.trl.safety.min3d.core;
 
 
 import android.util.Log;
+
+import java.util.TreeMap;
+
 import edu.smu.trl.safety.min3d.Min3d;
 import edu.smu.trl.safety.min3d.interfaces.IDirtyParent;
 import edu.smu.trl.safety.min3d.interfaces.IObject3dContainer;
@@ -15,11 +18,9 @@ import edu.smu.trl.safety.min3d.vos.Color4;
 import edu.smu.trl.safety.min3d.vos.Color4Managed;
 import edu.smu.trl.safety.min3d.vos.FogType;
 
-import java.util.ArrayList;
-
 
 public class Scene implements IObject3dContainer, IDirtyParent {
-    private ArrayList<Object3d> _children = new ArrayList<Object3d>();
+    private TreeMap<String, Object3d> _children = new TreeMap<>();
 
     private ManagedLightList _lights;
     private CameraVo _camera;
@@ -70,7 +71,7 @@ public class Scene implements IObject3dContainer, IDirtyParent {
     public void reset() {
         clearChildren(this);
 
-        _children = new ArrayList<Object3d>();
+        _children = new TreeMap<>();
 
         _camera = new CameraVo();
 
@@ -85,32 +86,41 @@ public class Scene implements IObject3dContainer, IDirtyParent {
      * Adds Object3d to Scene. Object3d's must be added to Scene in order to be rendered
      * Returns always true.
      */
-    public void addChild(Object3d $o) {
-        if (_children.contains($o)) return;
-
-        _children.add($o);
-
-        $o.parent(this);
-        $o.scene(this);
+    public void addChild(String $Key, Object3d $child) {
+        try {
+            if (_children.containsKey($Key)) return;
+            _children.put($Key, $child);
+            $child.parent(this);
+            $child.scene(this);
+        } catch (Exception Exception) {
+            int x = 0;
+        }
     }
 
-    public void addChildAt(Object3d $o, int $index) {
+ /*   public void addChildAt(Object3d $o, int $index) {
         if (_children.contains($o)) return;
 
         _children.add($index, $o);
-    }
+    }*/
 
     /**
      * Removes Object3d from Scene.
      * Returns false if unsuccessful
      */
-    public boolean removeChild(Object3d $o) {
-        $o.parent(null);
-        $o.scene(null);
-        return _children.remove($o);
+    public void removeChild(String $Key) {
+        try {
+            Object3d $O = _children.get($Key);
+            if ($O != null) {
+                _children.get($Key).parent(null);
+                _children.get($Key).scene(null);
+                _children.remove($Key);
+            }
+        } catch (Exception Exception) {
+            int x = 0;
+        }
     }
 
-    public Object3d removeChildAt(int $index) {
+/*    public Object3d removeChildAt(int $index) {
         Object3d o = _children.remove($index);
 
         if (o != null) {
@@ -118,25 +128,33 @@ public class Scene implements IObject3dContainer, IDirtyParent {
             o.scene(null);
         }
         return o;
-    }
+    }*/
 
-    public Object3d getChildAt(int $index) {
-        return _children.get($index);
-    }
+    // public Object3d getChildAt(int $index) {
+    //    return _children.get($index);
+    //}
 
     /**
      * TODO: Use better lookup
      */
     public Object3d getChildByName(String $name) {
-        for (int i = 0; i < _children.size(); i++) {
-            if (_children.get(0).name() == $name) return _children.get(0);
+
+        try {
+            return _children.get($name);
+        } catch (Exception Exception) {
+            int x = 0;
         }
         return null;
+
+       /* for (int i = 0; i < _children.size(); i++) {
+            if (_children.get(0).name() == $name) return _children.get(0);
+        }
+        return null;*/
     }
 
-    public int getChildIndexOf(Object3d $o) {
+  /*  public int getChildIndexOf(Object3d $o) {
         return _children.indexOf($o);
-    }
+    }*/
 
     public int numChildren() {
         return _children.size();
@@ -249,19 +267,22 @@ public class Scene implements IObject3dContainer, IDirtyParent {
     /**
      * Used by RendererActivity
      */
-    ArrayList<Object3d> children() /*package-private*/ {
+    public TreeMap<String, Object3d> children() /*package-private*/ {
         return _children;
     }
 
     private void clearChildren(IObject3dContainer $c) {
-        for (int i = $c.numChildren() - 1; i >= 0; i--) {
-            Object3d o = $c.getChildAt(i);
-            o.clear();
-
-            if (o instanceof Object3dContainer) {
-                clearChildren((Object3dContainer) o);
+        try {
+            for (Object3d Object3d : $c.children().values()) {
+                Object3d.clear();
+                if (Object3d instanceof Object3dContainer) {
+                    clearChildren((Object3dContainer) Object3d);
+                }
             }
+        } catch (Exception Exception) {
+            int x = 0;
         }
+
     }
 
     public void onDirty() {

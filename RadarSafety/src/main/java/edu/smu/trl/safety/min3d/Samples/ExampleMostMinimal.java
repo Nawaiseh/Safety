@@ -27,7 +27,7 @@ public class ExampleMostMinimal extends RendererActivity {
         scene.lights().add(new Light());
 
 		/*
-		 *  Create an Object3d and add it to the scene.
+         *  Create an Object3d and add it to the scene.
 		 *  In this case, we're creating a cube using the Box class, which extends Object3d.
 		 *  Any Object3d must be declared with booleans that determine whether its vertices store:
 		 *  	(a) U/V texture coordinates
@@ -47,7 +47,7 @@ public class ExampleMostMinimal extends RendererActivity {
 		/*
 		 * Add cube to the scene.
 		 */
-        scene.addChild(_cube);
+        scene.addChild("Cube", _cube);
     }
 
     @Override

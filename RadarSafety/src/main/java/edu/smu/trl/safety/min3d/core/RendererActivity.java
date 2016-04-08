@@ -8,6 +8,7 @@ import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+
 import edu.smu.trl.safety.min3d.Shared;
 import edu.smu.trl.safety.min3d.interfaces.ISceneController;
 
@@ -33,6 +34,7 @@ public class RendererActivity extends AppCompatActivity implements ISceneControl
         }
     };
     public Scene scene;
+    public Renderer Renderer;
     protected GLSurfaceView _glSurfaceView;
     protected Handler _initSceneHander;
     protected Handler _updateSceneHander;
@@ -50,12 +52,13 @@ public class RendererActivity extends AppCompatActivity implements ISceneControl
         //
         Shared.context(this);
         scene = new Scene(this);
-        Renderer r = new Renderer(scene);
-        Shared.renderer(r);
+        Renderer = new Renderer(scene);
+        Renderer.context = this;
+        Shared.renderer(Renderer);
 
         _glSurfaceView = new GLSurfaceView(this);
         glSurfaceViewConfig();
-        _glSurfaceView.setRenderer(r);
+        _glSurfaceView.setRenderer(Renderer);
         _glSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
         onCreateSetContentView();
@@ -108,6 +111,7 @@ public class RendererActivity extends AppCompatActivity implements ISceneControl
      * It is the user's responsibility to build the logic to restore state on-resume.
      */
     public void initScene() {
+
     }
 
     /**

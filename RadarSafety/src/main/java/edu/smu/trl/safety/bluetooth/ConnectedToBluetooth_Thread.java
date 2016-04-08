@@ -5,13 +5,15 @@ package edu.smu.trl.safety.bluetooth;
  */
 
 import android.bluetooth.BluetoothSocket;
-import edu.smu.trl.safety.radarsafety.Car;
-import edu.smu.trl.safety.radarsafety.Car.DistanceUnit;
-import edu.smu.trl.safety.utilities.Log;
+import android.os.SystemClock;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import edu.smu.trl.safety.radarsafety.Car;
+import edu.smu.trl.safety.radarsafety.Car.DistanceUnit;
+import edu.smu.trl.safety.utilities.Log;
 
 
 /**
@@ -49,6 +51,10 @@ public class ConnectedToBluetooth_Thread extends Thread {
         }
     }
 
+    private String BluetoothMessageAsString(byte[] Bluetooth_Message) {
+        String Result = String.format("%s\n%s", Car.BytesToHEX(Bluetooth_Message, 0, 38).trim(), Car.BytesToHEX(Bluetooth_Message, 38, 38).trim());
+        return Result;
+    }
 
     public void run() {
         Log.e(TAG, "BEGIN mConnectedThread");
@@ -62,38 +68,85 @@ public class ConnectedToBluetooth_Thread extends Thread {
         while (true) {
 
             try {
-                NumberOfBytes = InputStream.read(Bluetooth_Message);  // Read from the InputStream
-                Log.i(TAG, "NumberOfBytes:- " + NumberOfBytes);
-                String Message = "";
-                try {
+                Bluetooth_Message = new byte[80];
+                if (BluetoothSocket.isConnected()) {
+                    if (InputStream.available() > 0) {
+                        NumberOfBytes = InputStream.read(Bluetooth_Message);  // Read from the InputStream
+                        if (NumberOfBytes == 76) {
+                            String Bluetooth_MessageAsString = BluetoothMessageAsString(Bluetooth_Message);
+                            Log.i(TAG, "NumberOfBytes:- " + NumberOfBytes);
+                            String Message = "";
+                            synchronized (Lock) {
+                                try {
+                                    boolean Different = false;
+                                    for (int i = 1; i < 5; i++) {
+                                        if (Bluetooth_Message[i] != Bluetooth_Message[i + 38]) {
+                                            Different = true;
 
-                    MyCar.SetData(Bluetooth_Message, NumberOfBytes);
-                    OtherCar.SetData(Bluetooth_Message);
+                                            break;
+                                        }
+                                    }
+                                    if (!Different) {
+                                        continue;
+                                    }
+                                    MyCar.SetData(Bluetooth_Message);
+                                    OtherCar.SetData(Bluetooth_Message);
 
-                    double Distance = Car.ConvertDistance(MyCar.DistanceFrom(OtherCar), DistanceUnit.Meters);
-                    Message = String.format("%s, %s, Distance = %f Meters", MyCar.Position(), OtherCar.Position(), Distance);
+                                    OtherCar.DistanceInMeters = OtherCar.DistanceFrom(MyCar, DistanceUnit.Meters);
+                                    Message = String.format("Me:- %s\n OtherCar:- %s\nDistance = %.1f Meters",
+                                            MyCar.Position(Car.PositionType.NoAltitude), OtherCar.Position(Car.PositionType.NoAltitude), OtherCar.DistanceInMeters);
 
-                    synchronized (Lock) {
-                        if (BluetoothChatService.Renderer_Activity.Cars.containsKey(OtherCar.ID)) {
-                            BluetoothChatService.Renderer_Activity.Cars.get(OtherCar.ID).SetData(OtherCar);
+
+                                    BluetoothChatService.MessageHandler.obtainMessage(Constants.MESSAGE_READ, Message.length(), -1, Message).sendToTarget();
+
+
+                                    if (BluetoothChatService.Renderer_Activity.Cars.containsKey(OtherCar.ID)) {
+                                        BluetoothChatService.Renderer_Activity.Cars.get(OtherCar.ID).SetData(OtherCar);
+                                    } else {
+
+                                        BluetoothChatService.Renderer_Activity.Cars.put(OtherCar.ID, OtherCar);
+
+
+                                        OtherCar = new Car();
+                                    }
+
+                                    OtherCar.OpenGLLocation.x = OtherCar.Location.x - MyCar.Location.x;
+                                    OtherCar.OpenGLLocation.y = OtherCar.Location.x - MyCar.Location.y;
+                                    OtherCar.OpenGLLocation.z = OtherCar.Location.z - MyCar.Location.z;
+
+
+                                    OtherCar.OpenGLRotation.z = OtherCar.Direction - MyCar.Direction;
+
+
+
+/*                            if (DistanceInMeters <= BluetoothChatService.ThreasholdDistance) {
+                                Message = String.format("%s\nAlert!:- A Car is Closer than %d", Message, BluetoothChatService.ThreasholdDistance);
+                                BluetoothChatService.MessageHandler.obtainMessage(Constants.PLAY_ALERT_SOUND, Message.length(), -1, Message).sendToTarget();
+                                BluetoothChatService.LastUpdate = System.currentTimeMillis();
+                            } else {
+                                Message = String.format("%s\nCar Is Far Enough Now", Message);
+                                BluetoothChatService.MessageHandler.obtainMessage(Constants.STOP_ALERT_SOUND, Message.length(), -1, Message).sendToTarget();
+                            }*/
+
+                                } catch (Exception Exception) {
+                                    Log.e(TAG, "Disconnected", Exception);
+                                    Log.e(TAG, "Exception", Exception);
+                                }
+
+                            }
                         } else {
-
-                            BluetoothChatService.Renderer_Activity.Cars.put(OtherCar.ID, OtherCar);
-                            OtherCar = new Car();
+                            Log.e(TAG, "Exception:- Number of Bytes <> 76");
+                            int x = 0;
                         }
-
-                        if (Distance <= BluetoothChatService.ThreasholdDistance) {
-                            BluetoothChatService.MessageHandler.obtainMessage(Constants.PLAY_ALERT_SOUND, Message.length(), -1, Message).sendToTarget();
-                            BluetoothChatService.LastUpdate = System.currentTimeMillis();
-                        } else {
-                            BluetoothChatService.MessageHandler.obtainMessage(Constants.STOP_ALERT_SOUND, Message.length(), -1, Message).sendToTarget();
-                        }
+                    } else {
+                        SystemClock.sleep(10);
                     }
-                } catch (Exception Exception) {
-                    Log.e(TAG, "Exception", Exception);
-                }
+                } else {
 
-            } catch (IOException Exception) {
+                    Log.e(TAG, "Disconnected");
+                    BluetoothChatService.ConnectionLost();
+                }
+            } catch (Exception Exception) {
                 Log.e(TAG, "Disconnected", Exception);
                 BluetoothChatService.ConnectionLost();
 

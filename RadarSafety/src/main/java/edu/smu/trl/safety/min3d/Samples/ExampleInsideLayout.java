@@ -8,6 +8,7 @@ package edu.smu.trl.safety.min3d.Samples;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+
 import edu.smu.trl.safety.min3d.core.Object3dContainer;
 import edu.smu.trl.safety.min3d.core.RendererActivity;
 import edu.smu.trl.safety.min3d.objectPrimitives.Box;
@@ -49,7 +50,7 @@ public class ExampleInsideLayout extends RendererActivity implements View.OnClic
 
         scene.backgroundColor().setAll(0xff444444);
         _cube = new Box(1, 1, 1);
-        scene.addChild(_cube);
+        scene.addChild("Cube", _cube);
     }
 
     @Override

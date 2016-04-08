@@ -20,21 +20,34 @@ public class SoundAnimation {
 
     public void Start() {
         MediaPlayer = MediaPlayer.create(Context, SoundFileID);
-        MediaPlayer.setLooping(true);
-        MediaPlayer.start();
+        try {
+            if (MediaPlayer != null) {
+                MediaPlayer.setLooping(true);
+                //  MediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                MediaPlayer.start();
+            } else {
+
+                int x = 0;
+            }
+        } catch (Exception Exception) {
+
+        }
 
     }
 
     public void Stop() {
-        if (MediaPlayer != null) {
-            if (MediaPlayer.isPlaying()) {
-                MediaPlayer.stop();
-                MediaPlayer.setLooping(false);
+        try {
+            if (MediaPlayer != null) {
+                if (MediaPlayer.isPlaying()) {
+                    MediaPlayer.stop();
+                    MediaPlayer.setLooping(false);
+                }
+                MediaPlayer.release();
+                MediaPlayer = null;
             }
-            MediaPlayer.release();
-            MediaPlayer = null;
-        }
+        } catch (Exception Exception) {
 
+        }
     }
 }
 

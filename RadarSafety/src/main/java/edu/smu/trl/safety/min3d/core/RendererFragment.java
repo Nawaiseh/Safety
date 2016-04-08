@@ -4,8 +4,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.view.*;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
+
 import edu.smu.trl.safety.radarsafety.R;
 
 
@@ -48,7 +53,7 @@ public class RendererFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        ContainerView = (LinearLayout) view.findViewById(R.id.Container);
+        ContainerView = (LinearLayout) view.findViewById(R.id.OpenGLView);
     }
 
     @Override

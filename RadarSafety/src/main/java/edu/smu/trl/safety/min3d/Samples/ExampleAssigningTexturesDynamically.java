@@ -6,6 +6,7 @@ package edu.smu.trl.safety.min3d.Samples;
 
 
 import android.graphics.Bitmap;
+
 import edu.smu.trl.safety.min3d.Shared;
 import edu.smu.trl.safety.min3d.Utils;
 import edu.smu.trl.safety.min3d.core.Object3dContainer;
@@ -60,11 +61,11 @@ public class ExampleAssigningTexturesDynamically extends RendererActivity {
 
         _object1 = new Sphere(0.8f, 15, 10);
         _object1.position().y = 0.9f;
-        scene.addChild(_object1);
+        scene.addChild("Object1", _object1);
 
         _object2 = new Sphere(0.8f, 15, 10);
         _object2.position().y = -0.9f;
-        scene.addChild(_object2);
+        scene.addChild("Object2", _object2);
 
         _count = 0;
     }

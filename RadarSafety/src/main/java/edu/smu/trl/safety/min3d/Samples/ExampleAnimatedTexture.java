@@ -6,6 +6,7 @@ package edu.smu.trl.safety.min3d.Samples;
 
 
 import android.graphics.Bitmap;
+
 import edu.smu.trl.safety.min3d.Shared;
 import edu.smu.trl.safety.min3d.Utils;
 import edu.smu.trl.safety.min3d.core.Object3dContainer;
@@ -46,7 +47,7 @@ public class ExampleAnimatedTexture extends RendererActivity {
         _cube = new Box(1.3f, 1.3f, 1.3f);
         _cube.position().x = +0.4f;
         _cube.normalsEnabled(false);
-        scene.addChild(_cube);
+        scene.addChild("Cube", _cube);
 
         // Add textures in TextureManager
 

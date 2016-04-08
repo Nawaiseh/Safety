@@ -11,6 +11,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+
 import edu.smu.trl.safety.min3d.core.Object3dContainer;
 import edu.smu.trl.safety.min3d.core.RendererActivity;
 import edu.smu.trl.safety.min3d.objectPrimitives.SkyBox;
@@ -50,7 +51,7 @@ public class ExampleAccelerometer extends RendererActivity implements SensorEven
         mSkyBox.addTexture(SkyBox.Face.Down, R.drawable.floor, "down");
         mSkyBox.scale().y = 0.8f;
         mSkyBox.scale().z = 2.0f;
-        scene.addChild(mSkyBox);
+        scene.addChild("SkyBox", mSkyBox);
 
         IParser parser = Parser.createParser(Parser.Type.MAX_3DS,
                 getResources(), "edu.smu.trl.safety.radarsafety:raw/monster_high", true);
@@ -60,7 +61,7 @@ public class ExampleAccelerometer extends RendererActivity implements SensorEven
         mMonster.scale().x = mMonster.scale().y = mMonster.scale().z = .1f;
         mMonster.position().y = -2.5f;
         mMonster.position().z = -3;
-        scene.addChild(mMonster);
+        scene.addChild("Monster", mMonster);
 
         mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_UI);
     }

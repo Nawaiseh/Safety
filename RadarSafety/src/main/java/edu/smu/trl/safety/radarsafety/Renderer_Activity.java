@@ -1,64 +1,67 @@
 package edu.smu.trl.safety.radarsafety;
 
-
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
-import android.media.MediaPlayer;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.support.annotation.StringRes;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
-import android.widget.Toast;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.TreeMap;
+
 import edu.smu.trl.safety.bluetooth.BluetoothChatService;
 import edu.smu.trl.safety.bluetooth.Constants;
 import edu.smu.trl.safety.min3d.core.Object3dContainer;
-import edu.smu.trl.safety.min3d.core.RendererActivity;
-import edu.smu.trl.safety.min3d.parser.IParser;
-import edu.smu.trl.safety.min3d.parser.Parser;
-import edu.smu.trl.safety.min3d.vos.Light;
+import edu.smu.trl.safety.min3d.vos.Number3d;
 import edu.smu.trl.safety.utilities.Log;
 import edu.smu.trl.safety.utilities.SoundAnimation;
 
-import java.util.ArrayList;
-import java.util.TreeMap;
 
-/**
- * Created by TRL on 3/7/2016.
- */
-public class Renderer_Activity extends RendererActivity {
-
+public class Renderer_Activity extends AppCompatActivity {
     private static final String TAG = "Safety"; //  "BluetoothChatFragment";
-    private final static long _1Minute = 60000;
+    private final static long _LastUpdateThreashold = 5000;
     public static int NormalColor;
     public static int AlerColor;
     public static int UsedColor;
-    public static android.animation.ValueAnimator ValueAnimator;
+    public static ValueAnimator ValueAnimator;
     public static LinearLayout Layout;
     public static Object Lock = "5";
-    public BluetoothChatService BluetoothChatService;
-    public android.bluetooth.BluetoothAdapter BluetoothAdapter = null;
-    public StringBuffer StringBuffer;
-    public MediaPlayer Player;
-    public SoundAnimation SoundAnimation;
-    public CharSequence Title;
-    public TreeMap<Double, Object3dContainer> OpenGL_Cars = new TreeMap<>();
-    public TreeMap<Double, Car> Cars = new TreeMap<>();
     public Menu Menu;
     public MenuItem BluetoothMenuItem;
+    public CharSequence Title = "V2V Interface";
+    public BluetoothChatService BluetoothChatService;
+    public android.bluetooth.BluetoothAdapter BluetoothAdapter = null;
+    //public TreeMap<String, Object3dContainer> OpenGL_Cars = new TreeMap<>();
+    public Queue<Object3dContainer> CarsPool = new LinkedList<>();
+    public TreeMap<String, Car> Cars = new TreeMap<>();
+    public float RotationXAngle = 0.523599f;
     public Car MyCar = new Car();
-    // public int ConnectionState = Constants.STATE_NONE;
+    public SoundAnimation SoundAnimation;
+    protected PowerManager.WakeLock WakeLock;
+    TextView TextView;
+    private ListView BluetoothChatView;
+    private ArrayAdapter<String> BluetoothChatArrayAdapter;
     private String ConnectedDeviceName = null;
     public final Handler MessageHandler = new Handler() {
-
-        @Override
         public void handleMessage(Message Message) {
 
             switch (Message.what) {
@@ -86,120 +89,20 @@ public class Renderer_Activity extends RendererActivity {
             }
         }
     };
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-
-        //   this.requestWindowFeature(Window.FEATURE_ACTION_BAR);
-
-        Player = MediaPlayer.create(this, R.raw.beep);
-        Player.setLooping(true);
-
-
-        SoundAnimation = new SoundAnimation(this, R.raw.beep);
-        Layout = (LinearLayout) findViewById(R.id.Container);
-        NormalColor = Layout.getSolidColor();
-        AlerColor = getResources().getColor(R.color.alert_color);
-        UsedColor = NormalColor;
-
-
-        if (BluetoothAdapter == null) {
-            BluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            if (BluetoothAdapter == null) {
-                Toast.makeText(this, "Bluetooth Is Not Enabled", Toast.LENGTH_LONG).show();
-                finish();
-            }
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case Constants.REQUEST_ENABLE_BT:
-                // When the request to enable Bluetooth returns
-                if (resultCode == Activity.RESULT_OK) {
-                    // Bluetooth is now enabled, so set up a chat session
-                    SetupChat();
-                } else {
-                    // User did not enable Bluetooth or an error occurred
-                    Log.e(TAG, "Bluetooth Is Not Enabled");
-                    Toast.makeText(this, R.string.bt_not_enabled_leaving, Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu Menu) {
-        getMenuInflater().inflate(R.menu.bluetooth_chat, Menu);
-        RestoreActionBar();
-
-        this.Menu = Menu;
-        BluetoothMenuItem = Menu.findItem(R.id.ShowBluetoothNameToOthers);
-        return true;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        Log.e(TAG, "- On Start BluetoothChatFragment -");
-        if (BluetoothAdapter == null) {
-            return;
-        }
-        if (!BluetoothAdapter.isEnabled()) {
-            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableIntent, Constants.REQUEST_ENABLE_BT);
-        } else if (BluetoothChatService == null) {
-            SetupChat();
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.e(TAG, "- On Resume BluetoothChatFragment -");
-
-        if (BluetoothChatService != null) {
-            if (BluetoothChatService.getConnectionState() == BluetoothChatService.STATE_NONE) {
-                BluetoothChatService.Start();
-            }
-        }
-    }
-
-    @Override
-    public synchronized void onPause() {
-        super.onPause();
-        Log.e(TAG, "- On Pause BluetoothChatFragment -");
-
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        Log.e(TAG, "- On Stop BluetoothChatFragment -");
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.e(TAG, "- On Destroy BluetoothChatFragment -");
-        if (BluetoothChatService != null) {
-            BluetoothChatService.Stop();
-        }
-    }
+    //<editor-fold defaultstate="collapsed" desc=" ~~~~~~~~~~~~~~~~~~~~~~~~~~  InitializeCPLEX ~~~~~~~~~~~~~~~~~~~~~~~~~~ ">
+    private boolean RotationAllowed = false;
 
     public void EnsureDiscoverable() {
         Log.e(TAG, "- Ensure Discoverable BluetoothChatFragment -");
         if (BluetoothAdapter.getScanMode() != android.bluetooth.BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
             try {
                 Intent DiscoverableIntent = new Intent(android.bluetooth.BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-                DiscoverableIntent.putExtra(android.bluetooth.BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+                DiscoverableIntent.putExtra(android.bluetooth.BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, Integer.MAX_VALUE);
 
                 startActivity(DiscoverableIntent);
 
-                Toast.makeText(this, "Bluetooth Connection Enabled!", Toast.LENGTH_SHORT).show();
+                BluetoothChatArrayAdapter.add("Bluetooth Connection Is Enabled");
+                //   Toast.makeText(this, "Bluetooth Connection Enabled!", Toast.LENGTH_SHORT).show();
 
                 //MenuItem.setIcon(getResources().getDrawable(R.drawable.bluetooth_disconnected));
                 if (BluetoothMenuItem != null) {
@@ -248,6 +151,17 @@ public class Renderer_Activity extends RendererActivity {
                 return true;
             }
 
+            case R.id.Direction: {
+                if (MenuItem.getTitle().toString().toUpperCase().startsWith("ENABLE")) {
+                    MenuItem.setTitle("Disable Angle Rotation");
+                    RotationAllowed = true;
+                } else {
+                    MenuItem.setTitle("Enable Angle Rotation");
+                    RotationAllowed = false;
+                }
+
+                return true;
+            }
             case R.id.Five: {
                 synchronized (Lock) {
                     BluetoothChatService.ThreasholdDistance = 5;
@@ -286,180 +200,53 @@ public class Renderer_Activity extends RendererActivity {
         return super.onOptionsItemSelected(MenuItem);
     }
 
-    public void RestoreActionBar() {
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(Title);
-    }
+    protected void DisplayMessage(Message msg) {
+        try {
+            if (msg.obj instanceof String) {
+                String readMessage = (String) msg.obj;
 
-    private void SetupChat() {
-        Log.e(TAG, "setupChat()");
-        if (BluetoothChatService == null) {
-            BluetoothChatService = new BluetoothChatService(this, MessageHandler);
-        }
-        // Initialize the FloatBuffer for outgoing messages
-        StringBuffer = new StringBuffer("");
-    }
+                BluetoothChatArrayAdapter.add(readMessage);
+            } else {
+                byte[] readBuf = (byte[]) msg.obj;
+                String readMessage = new String(readBuf, 0, msg.arg1);
 
-    private Object3dContainer LoadCar() {
-        IParser ModelReader = Parser.createParser(Parser.Type.OBJ, getResources(), "edu.smu.trl.safety.radarsafety:raw/camaro_obj", true);
-        ModelReader.parse();
-
-        Object3dContainer Car = ModelReader.getParsedObject();
-        Car.scale().x = Car.scale().y = Car.scale().z = 1f;
-        Car.position().x = Car.position().y = Car.position().z = 0;
-
-
-        return Car;
-    }
-
-    @Override
-    public void initScene() {
-        synchronized (OpenGL_Cars) {
-            Light light = new Light();
-            light.ambient.setAll(0xff888888);
-            light.position.setAll(3, 0, 3);
-            scene.lights().add(light);
-
-
-            OpenGL_Cars.put(0.0, LoadCar());
-            /*
-            for (double Index = 1; Index < 10; Index++) {
-                OpenGL_Cars.put(Index, LoadCar());
+                BluetoothChatArrayAdapter.add(readMessage);
             }
-            */
-
-            scene.addChild(OpenGL_Cars.get(0.0));
-
-          /*
-          scene.addChild(OpenGL_Cars.get(1.0));
-
-            OpenGL_Cars.get(1.0).position().y = OpenGL_Cars.get(1.0).position().z = 0;
-            OpenGL_Cars.get(1.0).position().x = -2;
-            OpenGL_Cars.get(1.0).position().y = -2;
-            */
+        } catch (Exception Exception) {
+            Log.e(TAG, "Exception", Exception);
         }
-        scene.backgroundColor().r((short) 50);
-        scene.backgroundColor().g((short) 50);
-        scene.backgroundColor().b((short) 50);
-
-
-        scene.camera().position.rotateX(0);
-        scene.camera().position.setAll(0, 0, 30);
     }
 
-    @Override
-    public void updateScene() {
+    protected void SetStatus(int ResourceID) {
 
-        long TimeNow = System.currentTimeMillis();
-        synchronized (Lock) {
-            ArrayList<Car> OutDatedCars = new ArrayList();
-            for (Car Car : Cars.values()) {
-                if (Car == MyCar) {
-                    continue;
-                }
-                synchronized (Car) {
-                    if ((TimeNow - Car.LastUpdated) > _1Minute) {
-                        OutDatedCars.add(Car);
-                        scene.removeChild(OpenGL_Cars.get(Car.ID));
-                        OpenGL_Cars.remove(Car.ID);
-                    } else {
-                        if (!OpenGL_Cars.containsKey(Car.ID)) {
-                            OpenGL_Cars.put(Car.ID, LoadCar());
-                            scene.addChild(OpenGL_Cars.get(Car.ID));
-                        }
-                        OpenGL_Cars.get(Car.ID).position().x = Car.Location.x - MyCar.Location.x;
-                        OpenGL_Cars.get(Car.ID).position().y = Car.Location.y - MyCar.Location.y;
-                    }
-                }
+        try {
+            final android.app.ActionBar ActionBar = getActionBar();
+            if (ActionBar == null) {
+                return;
             }
+            ActionBar.setSubtitle(ResourceID);
+        } catch (Exception Exception) {
+            Log.e(TAG, "Exception", Exception);
         }
-    /*
-      synchronized (BluetoothChatService.CarLocations) {
-            if (BluetoothChatService.CarLocations.containsKey(1) && OpenGL_Cars.containsKey(1)) {
-
-                OpenGL_Cars.get(1).position().x = BluetoothChatService.CarLocations.get(1).x;
-                OpenGL_Cars.get(1).position().y = BluetoothChatService.CarLocations.get(1).y;
-            }
-        }
-        */
-
-       /* MyCar.rotation().x++;
-        MyCar.rotation().z++;
-
-        SecondCar.rotation().x--;
-        SecondCar.rotation().z--;
-
-        */
     }
 
-    @Override
-    protected void onCreateSetContentView() {
-        setContentView(R.layout.renderer_layout);
-        LinearLayout LinearLayout = (LinearLayout) this.findViewById(R.id.Container);
-        LinearLayout.addView(_glSurfaceView);
-
+    protected void SetStatus(CharSequence SubTitle) {
+        try {
+            final android.app.ActionBar ActionBar = getActionBar();
+            if (ActionBar == null) {
+                return;
+            }
+            ActionBar.setSubtitle(SubTitle);
+        } catch (Exception Exception) {
+            Log.e(TAG, "Exception", Exception);
+        }
     }
 
     public final String GetString(@StringRes int resId, Object... formatArgs) {
         return getResources().getString(resId, formatArgs);
     }
 
-    private void DisplayMessage(Message msg) {
-        if (msg.obj instanceof String) {
-            String readMessage = (String) msg.obj;
-        } else {
-            byte[] readBuf = (byte[]) msg.obj;
-            String readMessage = new String(readBuf, 0, msg.arg1);
-        }
-    }
-
-    public ValueAnimator StartColorAnimation(View View) {
-        int colorStart = View.getSolidColor();
-        int colorEnd = 0xFFFF0000;
-
-        ValueAnimator ValueAnimator = ObjectAnimator.ofInt(View, "backgroundColor", colorStart, colorEnd);
-
-        // colorAnim.setDuration(ValueAnimator.INFINITE);
-        ValueAnimator.setEvaluator(new ArgbEvaluator());
-        ValueAnimator.setRepeatCount(ValueAnimator.INFINITE);
-        ValueAnimator.setRepeatMode(ValueAnimator.INFINITE);
-        //colorAnim.setRepeatMode(ValueAnimator.REVERSE);
-        ValueAnimator.start();
-        SoundAnimation.Start();
-        return ValueAnimator;
-    }
-
-    public void StopColorAnimation(View View, ValueAnimator ValueAnimator, int Color) {
-        int colorStart = Color;
-        int colorEnd = 0xFFFF0000;
-        if (View != null && ValueAnimator != null) {
-            ValueAnimator.cancel();
-            SoundAnimation.Stop();
-            View.setBackgroundColor(Color);
-        }
-    }
-
-    private void SetStatus(int ResourceID) {
-
-        final android.app.ActionBar ActionBar = getActionBar();
-        if (ActionBar == null) {
-            return;
-        }
-        ActionBar.setSubtitle(ResourceID);
-    }
-
-    private void SetStatus(CharSequence SubTitle) {
-
-        final android.app.ActionBar ActionBar = getActionBar();
-        if (ActionBar == null) {
-            return;
-        }
-        ActionBar.setSubtitle(SubTitle);
-    }
-
-    private void MessageStatusChanged(Message Message) {
+    protected void MessageStatusChanged(Message Message) {
         switch (Message.arg1) {
             case Constants.STATE_CONNECTED:
                 String Status = GetString(R.string.title_connected_to, ConnectedDeviceName);
@@ -467,7 +254,7 @@ public class Renderer_Activity extends RendererActivity {
                 if (BluetoothMenuItem != null) {
                     BluetoothMenuItem.setIcon(R.drawable.bluetooth_connected);
                 }
-
+                BluetoothChatArrayAdapter.clear();
                 break;
             case Constants.STATE_CONNECTING:
                 SetStatus(R.string.title_connecting);
@@ -485,40 +272,347 @@ public class Renderer_Activity extends RendererActivity {
         }
     }
 
-    private void MessageWrite(Message Message) {
-        byte[] writeBuf = (byte[]) Message.obj;
-        String writeMessage = new String(writeBuf);
-    }
+    protected void MessageWrite(Message Message) {
+        try {
+            byte[] writeBuf = (byte[]) Message.obj;
+            String writeMessage = new String(writeBuf);
 
-    private void MessageDeviceName(Message Message) {
-        ConnectedDeviceName = Message.getData().getString(Constants.DEVICE_NAME);
-        Toast.makeText(this, "Connected To: " + ConnectedDeviceName, Toast.LENGTH_SHORT).show();
-        if (BluetoothMenuItem != null) {
-            BluetoothMenuItem.setIcon(R.drawable.bluetooth_connected);
+            BluetoothChatArrayAdapter.add("Me:  " + writeMessage);
+        } catch (Exception Exception) {
+            Log.e(TAG, "Exception", Exception);
         }
-
-
     }
 
-    private void MessageToast(Message Message) {
-        Toast.makeText(this, Message.getData().getString(Constants.TOAST), Toast.LENGTH_SHORT).show();
+    protected void MessageDeviceName(Message Message) {
+        try {
+            ConnectedDeviceName = Message.getData().getString(Constants.DEVICE_NAME);
+            BluetoothChatArrayAdapter.add(String.format("Connected To: %s", ConnectedDeviceName));
+            // Toast.makeText(this, "Connected To: " + ConnectedDeviceName, Toast.LENGTH_SHORT).show();
+            TextView.setText("Connected To: " + ConnectedDeviceName);
+
+            if (BluetoothMenuItem != null) {
+                BluetoothMenuItem.setIcon(R.drawable.bluetooth_connected);
+            }
+
+        } catch (Exception Exception) {
+            Log.e(TAG, "Exception", Exception);
+        }
     }
 
-    private void MessagePlaySound(Message Message) {
+    protected void MessageToast(Message Message) {
+        DisplayMessage(Message);
+        //Toast.makeText(this, Message.getData().getString(Constants.TOAST), Toast.LENGTH_SHORT).show();
+    }
+
+    protected void MessagePlaySound(Message Message) {
         DisplayMessage(Message);
         if (!BluetoothChatService.AlertIsGoing) {
             BluetoothChatService.AlertIsGoing = true;
             ValueAnimator = StartColorAnimation(Layout);
+            BluetoothChatArrayAdapter.add("Alert!:- A Car is Too Close");
         }
     }
 
-    private void MessageStopSound(Message Message) {
+    protected void MessageStopSound(Message Message) {
         DisplayMessage(Message);
         if (BluetoothChatService.AlertIsGoing) {
             BluetoothChatService.AlertIsGoing = false;
+            //  BluetoothChatArrayAdapter.add("Cars Are Far Enough Now");
             StopColorAnimation(Layout, ValueAnimator, NormalColor);
         }
     }
 
+    protected void SetupChat() {
+        Log.e(TAG, "setupChat()");
+        if (BluetoothChatService == null) {
+            BluetoothChatService = new BluetoothChatService(this, MessageHandler);
+        }
 
+        BluetoothChatArrayAdapter = new ArrayAdapter<String>(this, R.layout.message);
+
+        BluetoothChatView.setAdapter(BluetoothChatArrayAdapter);
+        //  // Initialize the FloatBuffer for outgoing messages
+        // StringBuffer = new StringBuffer("");
+    }
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.e(TAG, "- On Start BluetoothChatFragment -");
+        if (BluetoothAdapter == null) {
+            return;
+        }
+        if (!BluetoothAdapter.isEnabled()) {
+            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableIntent, Constants.REQUEST_ENABLE_BT);
+        } else if (BluetoothChatService == null) {
+            SetupChat();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.e(TAG, "- On Resume BluetoothChatFragment -");
+
+        if (BluetoothChatService != null) {
+            if (BluetoothChatService.getConnectionState() == BluetoothChatService.STATE_NONE) {
+                BluetoothChatService.Start();
+            }
+        }
+    }
+
+    @Override
+    public synchronized void onPause() {
+        super.onPause();
+        Log.e(TAG, "- On Pause BluetoothChatFragment -");
+
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.e(TAG, "- On Stop BluetoothChatFragment -");
+    }
+
+    @Override
+    public void onDestroy() {
+        if (WakeLock != null) {
+            this.WakeLock.release();
+        }
+        super.onDestroy();
+        Log.e(TAG, "- On Destroy BluetoothChatFragment -");
+        if (BluetoothChatService != null) {
+            BluetoothChatService.Stop();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu Menu) {
+        getMenuInflater().inflate(R.menu.bluetooth_chat, Menu);
+        RestoreActionBar();
+
+        this.Menu = Menu;
+        BluetoothMenuItem = Menu.findItem(R.id.ShowBluetoothNameToOthers);
+        return true;
+    }
+
+    public void RestoreActionBar() {
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+        actionBar.setDisplayShowTitleEnabled(true);
+        actionBar.setTitle(Title);
+    }
+
+    public ValueAnimator StartColorAnimation(View View) {
+        try {
+            int colorStart = View.getSolidColor();
+            int colorEnd = getResources().getColor(R.color.alert_color);
+
+
+            ValueAnimator ValueAnimator = ObjectAnimator.ofInt(View, "backgroundColor", colorStart, colorEnd);
+
+            // colorAnim.setDuration(ValueAnimator.INFINITE);
+            ValueAnimator.setEvaluator(new ArgbEvaluator());
+            ValueAnimator.setRepeatCount(ValueAnimator.INFINITE);
+            ValueAnimator.setRepeatMode(ValueAnimator.INFINITE);
+            //colorAnim.setRepeatMode(ValueAnimator.REVERSE);
+            ValueAnimator.start();
+            SoundAnimation.Start();
+            return ValueAnimator;
+        } catch (Exception Exception) {
+            Log.e(TAG, "Exception", Exception);
+        }
+        return null;
+    }
+
+    public void StopColorAnimation(View View, ValueAnimator ValueAnimator, int Color) {
+        int colorStart = Color;
+        int colorEnd = 0xFFFF0000;
+        try {
+            if (View != null && ValueAnimator != null) {
+                ValueAnimator.cancel();
+                SoundAnimation.Stop();
+                View.setBackgroundColor(Color);
+            }
+        } catch (Exception Exception) {
+            Log.e(TAG, "Exception", Exception);
+        }
+    }
+
+    //</editor-fold>
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_renderer_);
+        MyCar.Type = Car.CarType.MyCar;
+        BluetoothChatView = (ListView) this.findViewById(R.id.ListView);
+
+        BluetoothChatView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+        final PowerManager pm = (PowerManager) getSystemService(this.POWER_SERVICE);
+        this.WakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "My Tag");
+        this.WakeLock.acquire();
+
+        TextView = (TextView) this.findViewById(R.id.ConnectionStatus);
+        //  Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        // setSupportActionBar(toolbar);
+
+
+        SoundAnimation = new SoundAnimation(this, R.raw.beep);
+        Layout = (LinearLayout) findViewById(R.id.DrawingView);
+        NormalColor = Layout.getSolidColor();
+        AlerColor = getResources().getColor(R.color.normal_color);
+        UsedColor = NormalColor;
+
+
+        if (BluetoothAdapter == null) {
+            BluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            if (BluetoothAdapter == null) {
+                //  Toast.makeText(this, "Bluetooth Is Not Enabled", Toast.LENGTH_LONG).show();
+                finish();
+            }
+        }
+
+      /*  Display display = getWindowManager().getDefaultDisplay();
+        int width = display.getWidth()-100;
+        int height = display.getHeight() - 20;
+*/
+        Layout.addView(new MyView(this));
+
+
+/*
+
+
+        Cars.put("Car1", new Car());
+        Cars.put("Car2", new Car());
+
+        MyCar.Location.x = 50;
+        MyCar.Location.y = 50;
+
+        Cars.get("Car1").Location.x = 100;
+        Cars.get("Car1").Location.y = 150;
+
+        Cars.get("Car2").Location.x = 100;
+        Cars.get("Car2").Location.y = 50;*/
+    }
+
+    public class MyView extends View {
+        Paint BackGroundPaint = new Paint();
+        Paint MyCarPaint = new Paint();
+        Paint OtherCarPaint = new Paint();
+        Number3d Center = new Number3d();
+        Number3d OtherCarLocation = new Number3d();
+        Typeface Typeface;
+        ArrayList<Car> OutDatedCars = new ArrayList<>();
+
+        public MyView(Context context) {
+            super(context);
+
+
+            this.Typeface = Typeface.createFromAsset(getAssets(), "Roboto-Regular.ttf");
+
+
+            /*Display display = getWindowManager().getDefaultDisplay();
+            int width = display.getWidth()-100;
+            int height = display.getHeight() - 20;
+            this.setMinimumWidth(width);
+            this.setMinimumHeight(height);*/
+
+            BackGroundPaint.setStyle(Paint.Style.FILL);
+            BackGroundPaint.setColor(NormalColor);
+
+            MyCarPaint.setStyle(Paint.Style.FILL);
+            MyCarPaint.setColor(getResources().getColor(R.color.MyCar_color));
+
+            MyCarPaint.setTypeface(this.Typeface);
+
+            OtherCarPaint.setStyle(Paint.Style.FILL);
+            OtherCarPaint.setTypeface(this.Typeface);
+            OtherCarPaint.setColor(getResources().getColor(R.color.OtherCars_color));
+        }
+
+        private void DrawRectangle(Canvas Canvas, Paint Paint, Number3d Location) {
+            Canvas.drawRect(Location.x - 10, Location.y - 20, Location.x + 10, Location.y + 20, Paint);
+        }
+
+        @Override
+        protected void onDraw(Canvas Canvas) {
+
+            String Message;
+            float MinDistance = Float.MAX_VALUE;
+            super.onDraw(Canvas);
+            try {
+                long TimeNow = System.currentTimeMillis();
+
+                Center.x = getWidth() / 2F;
+                Center.y = getHeight() / 2F;
+                Canvas.drawPaint(BackGroundPaint);
+
+
+                DrawRectangle(Canvas, MyCarPaint, Center);
+                int Y = 20;
+                //Canvas.drawText("MyCar[" + MyCar.ID + "] @ (" + MyCar.OpenGLLocation.x + " , " + MyCar.OpenGLLocation.y + ")", 5, Y, MyCarPaint);
+                if (MyCar != null && MyCar.ID != null) {
+                    Canvas.drawText(String.format("[%s] Located @ (%.2f , %.2f )", MyCar.ID, MyCar.OpenGLLocation.x, MyCar.OpenGLLocation.y), 5, Y, MyCarPaint);
+                }
+                Y += 20;
+                Log.i(TAG, String.format("MyCar:- %s", Center.toString()));
+                for (Car Car : Cars.values()) {
+
+                    if (MinDistance > Car.DistanceInMeters) {
+                        MinDistance = Car.DistanceInMeters;
+                    }
+                    if ((TimeNow - Car.LastUpdated) > _LastUpdateThreashold) {
+                        OutDatedCars.add(Car);
+                    } else {
+                        OtherCarLocation.x = Center.x + ((Car.OpenGLLocation.x - MyCar.OpenGLLocation.x) * 3);
+                        OtherCarLocation.y = Center.y + ((Car.OpenGLLocation.y - MyCar.OpenGLLocation.y) * 3);
+
+
+                        Log.i(TAG, String.format("OtherCar:- %s", OtherCarLocation.toString()));
+                        DrawRectangle(Canvas, OtherCarPaint, OtherCarLocation);
+                        if (Car != null && Car.ID != null) {
+                            Canvas.drawText(String.format("[%s] Located @ (%.2f , %.2f ) Distance = %.3f", Car.ID, Car.OpenGLLocation.x, Car.OpenGLLocation.y, Car.DistanceInMeters), 5, Y, OtherCarPaint);
+                        }
+                        Y += 20;
+                    }
+                }
+
+
+                if (MinDistance <= BluetoothChatService.ThreasholdDistance) {
+                    Message = String.format("Alert!:- A Car is Closer than %d", BluetoothChatService.ThreasholdDistance);
+                    BluetoothChatService.MessageHandler.obtainMessage(Constants.PLAY_ALERT_SOUND, Message.length(), -1, Message).sendToTarget();
+                    BluetoothChatService.LastUpdate = System.currentTimeMillis();
+                } else {
+
+                    Message = String.format("Cars Are Far Enough");
+                    BluetoothChatService.MessageHandler.obtainMessage(Constants.STOP_ALERT_SOUND, Message.length(), -1, Message).sendToTarget();
+                }
+                for (Car Car : OutDatedCars) {
+                    Cars.remove(Car.ID);
+                }
+                if (Cars.isEmpty()) {
+                    // if (BluetoothChatService.AlertIsGoing) {
+                    edu.smu.trl.safety.bluetooth.BluetoothChatService.AlertIsGoing = false;
+                    //  BluetoothChatArrayAdapter.add("Cars Are Far Enough Now");
+                    StopColorAnimation(Layout, ValueAnimator, NormalColor);
+                    //   }
+                }
+                OutDatedCars.clear();
+                try {
+                    Thread.sleep(30);
+                } catch (InterruptedException e) {
+                    Log.i(TAG, "Error");
+                }
+
+                invalidate();  // Force a re-draw
+
+            } catch (Exception e) {
+                Log.i(TAG, "Error");
+            }
+        }
+    }
 }

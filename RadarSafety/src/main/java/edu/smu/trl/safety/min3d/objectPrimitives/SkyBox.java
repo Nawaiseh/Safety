@@ -5,6 +5,7 @@ package edu.smu.trl.safety.min3d.objectPrimitives;
  */
 
 import android.graphics.Bitmap;
+
 import edu.smu.trl.safety.min3d.Shared;
 import edu.smu.trl.safety.min3d.Utils;
 import edu.smu.trl.safety.min3d.core.Object3dContainer;
@@ -69,12 +70,12 @@ public class SkyBox extends Object3dContainer {
         faces[Face.Up.ordinal()] = up;
         faces[Face.Down.ordinal()] = down;
 
-        addChild(north);
-        addChild(east);
-        addChild(south);
-        addChild(west);
-        addChild(up);
-        addChild(down);
+        addChild("North", north);
+        addChild("East", east);
+        addChild("South", south);
+        addChild("West", west);
+        addChild("Up", up);
+        addChild("Down", down);
     }
 
     public void addTexture(Face face, int resourceId, String id) {

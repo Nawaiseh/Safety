@@ -7,15 +7,16 @@ package edu.smu.trl.safety.min3d.parser;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.util.Log;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import edu.smu.trl.safety.min3d.Min3d;
 import edu.smu.trl.safety.min3d.Shared;
 import edu.smu.trl.safety.min3d.core.Object3dContainer;
 import edu.smu.trl.safety.min3d.vos.Number3d;
 import edu.smu.trl.safety.min3d.vos.Uv;
-
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 
 public class Max3DSParser extends AParser implements IParser {
     private final int IDENTIFIER_3DS = 0x4D4D;
@@ -207,7 +208,7 @@ public class Max3DSParser extends AParser implements IParser {
         for (int i = 0; i < numObjects; i++) {
             ParseObjectData o = parseObjects.get(i);
             Log.d(Min3d.TAG, "Creating object " + o.name);
-            obj.addChild(o.getParsedObject(materialMap, textureAtlas));
+            obj.addChild(String.format("%d", i), o.getParsedObject(materialMap, textureAtlas));
         }
 
         if (textureAtlas.hasBitmaps()) {

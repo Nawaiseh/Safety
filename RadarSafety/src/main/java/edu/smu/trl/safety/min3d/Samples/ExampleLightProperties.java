@@ -12,6 +12,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+
 import edu.smu.trl.safety.min3d.core.Object3dContainer;
 import edu.smu.trl.safety.min3d.core.RendererActivity;
 import edu.smu.trl.safety.min3d.objectPrimitives.Box;
@@ -183,10 +184,10 @@ public class ExampleLightProperties extends RendererActivity {
 
         _rect = new Box(6, 6, .1f);
         _rect.position().z = -3;
-        scene.addChild(_rect);
+        scene.addChild("Rectangle", _rect);
 
         _obj = new Sphere(1.5f, 20, 20);
-        scene.addChild(_obj);
+        scene.addChild("Object", _obj);
     }
 
     @Override

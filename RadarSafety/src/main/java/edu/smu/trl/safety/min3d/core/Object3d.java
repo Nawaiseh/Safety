@@ -5,14 +5,15 @@ package edu.smu.trl.safety.min3d.core;
  */
 
 
+import java.util.ArrayList;
+
+import javax.microedition.khronos.opengles.GL10;
+
 import edu.smu.trl.safety.min3d.interfaces.IObject3dContainer;
 import edu.smu.trl.safety.min3d.vos.Color4;
 import edu.smu.trl.safety.min3d.vos.Number3d;
 import edu.smu.trl.safety.min3d.vos.RenderType;
 import edu.smu.trl.safety.min3d.vos.ShadeModel;
-
-import javax.microedition.khronos.opengles.GL10;
-import java.util.ArrayList;
 
 /**
  * @author Lee
@@ -46,7 +47,7 @@ public class Object3d {
     private IObject3dContainer _parent;
 
     /**
-     * Maximum number of vertices and faces must be specified at instantiation.
+     * Maximum number of TextVertices and faces must be specified at instantiation.
      */
     public Object3d(int $maxVertices, int $maxFaces) {
         _vertices = new Vertices($maxVertices, true, true, true);
@@ -286,7 +287,7 @@ public class Object3d {
         if (this.vertices().colors() != null) this.vertices().colors().clear();
         if (_textures != null) _textures.clear();
 
-        if (this.parent() != null) this.parent().removeChild(this);
+        // if (this.parent() != null) this.parent().removeChild(this);
     }
 
     //

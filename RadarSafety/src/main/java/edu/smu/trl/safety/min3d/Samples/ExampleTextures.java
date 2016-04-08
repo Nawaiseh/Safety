@@ -5,6 +5,7 @@ package edu.smu.trl.safety.min3d.Samples;
  */
 
 import android.graphics.Bitmap;
+
 import edu.smu.trl.safety.min3d.Shared;
 import edu.smu.trl.safety.min3d.Utils;
 import edu.smu.trl.safety.min3d.core.Object3dContainer;
@@ -24,7 +25,7 @@ public class ExampleTextures extends RendererActivity {
         scene.lights().add(new Light());
 
         _cube = new Box(1.5f, 1.5f, 1.5f);
-        scene.addChild(_cube);
+        scene.addChild("Cube", _cube);
 
         // Create a Bitmap. Here we're generating it from an embedded resource,
         // but the Bitmap could be created in any manner (eg, dynamically).

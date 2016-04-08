@@ -6,6 +6,7 @@ package edu.smu.trl.safety.min3d.Samples;
 
 
 import android.graphics.Bitmap;
+
 import edu.smu.trl.safety.min3d.Shared;
 import edu.smu.trl.safety.min3d.Utils;
 import edu.smu.trl.safety.min3d.core.Object3dContainer;
@@ -33,15 +34,15 @@ public class ExampleMipMap extends RendererActivity {
         scene.lights().add(new Light());
 
         _holder = new Object3dContainer(0, 0);
-        scene.addChild(_holder);
+        scene.addChild("Holder", _holder);
 
         _cubeWithMipMap = new Box(1.5f, 1.5f, 1.5f);
         _cubeWithMipMap.position().y = 1f;
-        _holder.addChild(_cubeWithMipMap);
+        _holder.addChild("CubeWithMipMap", _cubeWithMipMap);
 
         _cubeWithoutMipMap = new Box(1.5f, 1.5f, 1.5f);
         _cubeWithoutMipMap.position().y = -1f;
-        _holder.addChild(_cubeWithoutMipMap);
+        _holder.addChild("CubeWithoutMipMap", _cubeWithoutMipMap);
 
         //
 

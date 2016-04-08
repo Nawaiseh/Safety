@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
+
 import edu.smu.trl.safety.min3d.animation.AnimationObject3d;
 import edu.smu.trl.safety.min3d.core.RendererActivity;
 import edu.smu.trl.safety.min3d.parser.IParser;
@@ -62,7 +63,7 @@ public class ExampleKeyframeAnimation extends RendererActivity implements View.O
         ogre.scale().x = ogre.scale().y = ogre.scale().z = .07f;
         ogre.rotation().z = -90;
         ogre.rotation().x = -90;
-        scene.addChild(ogre);
+        scene.addChild("Ogre", ogre);
         ogre.setFps(70);
     }
 

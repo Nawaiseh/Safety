@@ -1,60 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android = "http://schemas.android.com/apk/res/android"
-          package = "edu.smu.trl.safety.radarsafety">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="edu.smu.trl.safety.radarsafety">
 
-    <uses-permission android:name = "android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name = "android.permission.BLUETOOTH" />
-    <!-- <uses-permission android:name = "android.permission.BLUETOOTH_PRIVILEGED" />-->
-    <uses-permission android:name = "android.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
-            android:allowBackup = "true"
-            android:icon = "@mipmap/ic_launcher"
-            android:label = "@string/app_name"
-            android:theme = "@style/AppTheme">
-        <activity android:name = ".Renderer_Activity"
-                  android:label = "@string/app_name">
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme">
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleAccelerometer" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleAnimatedTexture" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleAnimatingVertices" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleAssigningTexturesDynamically" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleCamera" />
+        <activity
+            android:name="edu.smu.trl.safety.min3d.Samples.ExampleFog"
+            android:label="@string/app_name" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleFromScratch" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleInsideLayout" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleKeyframeAnimation" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleLightProperties" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleLoad3DSFile" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleLoadMD2File" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleLoadObjFile" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleLoadObjFileMultiple" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleMipMap" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleMostMinimal" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleMultipleLights" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleMultiTexture" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleRenderType" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleRotatingPlanets" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleSubsetOfFaces" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleTextureOffset" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleTextures" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleTextureWrap" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleTransparentGlSurface" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleVertexColors" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleVerticesVariations" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.SplashActivity" />
+        <activity android:name="edu.smu.trl.safety.min3d.Samples.ScratchActivity" />
+        <activity
+            android:name=".Renderer_Activity"
+            android:label="@string/title_activity_renderer_">
             <intent-filter>
-                <action android:name = "android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name = "android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleAccelerometer" />
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleAnimatedTexture" />
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleAnimatingVertices" />
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleAssigningTexturesDynamically" />
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleCamera" />
-
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleFog" android:label = "@string/app_name" />
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleFromScratch" />
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleInsideLayout" />
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleKeyframeAnimation" />
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleLightProperties" />
-
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleLoad3DSFile" />
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleLoadMD2File" />
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleLoadObjFile" />
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleLoadObjFileMultiple" />
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleMipMap" />
-
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleMostMinimal" />
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleMultipleLights" />
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleMultiTexture" />
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleRenderType" />
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleRotatingPlanets" />
-
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleSubsetOfFaces" />
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleTextureOffset" />
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleTextures" />
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleTextureWrap" />
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleTransparentGlSurface" />
-
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleVertexColors" />
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ExampleVerticesVariations" />
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.SplashActivity" />
-        <activity android:name = "edu.smu.trl.safety.min3d.Samples.ScratchActivity" />
-
     </application>
 
 </manifest>

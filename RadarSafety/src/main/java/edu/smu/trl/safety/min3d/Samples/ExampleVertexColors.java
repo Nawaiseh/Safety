@@ -20,7 +20,7 @@ public class ExampleVertexColors extends RendererActivity {
          */
         _cube = new Box(1, 1, 1);
         _cube.colorMaterialEnabled(true);
-        scene.addChild(_cube);
+        scene.addChild("Cube", _cube);
 
         /**
          * Turn off lighting so that colors come thru "as-is", without any changes in brightness based on

@@ -11,25 +11,31 @@ import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
 import android.opengl.GLUtils;
 import android.util.Log;
-import edu.smu.trl.safety.min3d.Min3d;
-import edu.smu.trl.safety.min3d.Shared;
-import edu.smu.trl.safety.min3d.animation.AnimationObject3d;
-import edu.smu.trl.safety.min3d.vos.FrustumManaged;
-import edu.smu.trl.safety.min3d.vos.Light;
-import edu.smu.trl.safety.min3d.vos.RenderType;
-import edu.smu.trl.safety.min3d.vos.TextureVo;
+
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.opengles.GL11;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
+
+import edu.smu.trl.safety.min3d.Min3d;
+import edu.smu.trl.safety.min3d.Shared;
+import edu.smu.trl.safety.min3d.animation.AnimationObject3d;
+import edu.smu.trl.safety.min3d.vos.Color4;
+import edu.smu.trl.safety.min3d.vos.FrustumManaged;
+import edu.smu.trl.safety.min3d.vos.Light;
+import edu.smu.trl.safety.min3d.vos.Number3d;
+import edu.smu.trl.safety.min3d.vos.RenderType;
+import edu.smu.trl.safety.min3d.vos.TextureVo;
 
 
 public class Renderer implements GLSurfaceView.Renderer {
     public static final int NUM_GLLIGHTS = 8;
     // stats-related
     public static final int FRAMERATE_SAMPLEINTERVAL_MS = 1000;
+    public Number3d Location = new Number3d(50, 50, 0);
+    protected Context context;                           // Context (from Activity)
     private GL10 _gl;
     private Scene _scene;
     private TextureManager _textureManager;
@@ -43,6 +49,10 @@ public class Renderer implements GLSurfaceView.Renderer {
     private long _timeLastSample;
     private ActivityManager _activityManager;
     private ActivityManager.MemoryInfo _memoryInfo;
+    private GLText glText;                             // A GLText Instance
+    private int width = 100;                           // Updated to the Current Width + Height in onSurfaceChanged()
+    private int height = 100;
+    private Color4 Color = new Color4(1F, 0, 0, 1F);
 
     public Renderer(Scene $scene) {
         _scene = $scene;
@@ -55,6 +65,7 @@ public class Renderer implements GLSurfaceView.Renderer {
 
         _activityManager = (ActivityManager) Shared.context().getSystemService(Context.ACTIVITY_SERVICE);
         _memoryInfo = new ActivityManager.MemoryInfo();
+
     }
 
     public void onSurfaceCreated(GL10 $gl, EGLConfig eglConfig) {
@@ -67,6 +78,17 @@ public class Renderer implements GLSurfaceView.Renderer {
         reset();
 
         _scene.init();
+
+
+        // InitText($gl);
+    }
+
+    private void InitText(GL10 $gl) {
+
+        glText = new GLText($gl, context.getAssets());
+
+        glText.load("Roboto-Regular.ttf", 60, 2, 2);  // Create Font (Height: 14 Pixels / X+Y Padding 2 Pixels)
+
     }
 
     public void onSurfaceChanged(GL10 gl, int w, int h) {
@@ -79,11 +101,19 @@ public class Renderer implements GLSurfaceView.Renderer {
         _gl.glMatrixMode(GL10.GL_PROJECTION);
         _gl.glLoadIdentity();
 
+
         updateViewFrustrum();
+
+        // Save width and height
+        this.width = w;                             // Save Current Width
+        this.height = h;                           // Save Current Height
     }
 
     public void onDrawFrame(GL10 gl) {
         // Update 'model'
+        String Info = "Hello World";
+        DisplayText(Info, Location, Color);
+
         _scene.update();
 
         // Update 'view'
@@ -93,6 +123,36 @@ public class Renderer implements GLSurfaceView.Renderer {
         if (_logFps) doFps();
     }
 
+    public void DisplayText(String Text, Number3d Position, Color4 Color) {
+
+        if (glText == null) {
+            return;
+        }
+        // Redraw background color
+        _gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
+
+        // Set to ModelView mode
+        _gl.glMatrixMode(GL10.GL_MODELVIEW);           // Activate Model View Matrix
+        _gl.glLoadIdentity();                            // Load Identity Matrix
+
+        // enable texture + alpha blending
+        // NOTE: this is required for text rendering! we could incorporate it into
+        // the GLText class, but then it would be called multiple times (which impacts performance).
+        _gl.glEnable(GL10.GL_TEXTURE_2D);              // Enable Texture Mapping
+        _gl.glEnable(GL10.GL_BLEND);                   // Enable Alpha Blend
+        _gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);  // Set Alpha Blend Function
+
+
+        glText.begin(Color.r, Color.g, Color.b, Color.a);         // Begin Text Rendering (Set Color WHITE)
+        glText.draw(Text, Position.x, Position.y);          // Draw Test String
+        glText.end();                                   // End Text Rendering
+
+
+        // disable texture + alpha
+        _gl.glDisable(GL10.GL_BLEND);                  // Disable Alpha Blend
+        _gl.glDisable(GL10.GL_TEXTURE_2D);             // Disable Texture Mapping
+
+    }
     //
 
     /**
@@ -252,13 +312,21 @@ public class Renderer implements GLSurfaceView.Renderer {
             _gl.glDisable(GL10.GL_FOG);
         }
 
-        for (int i = 0; i < _scene.children().size(); i++) {
+        for (Object3d Object3d : _scene.children().values()) {
+            if (Object3d != null) {
+                if (Object3d.animationEnabled()) {
+                    ((AnimationObject3d) Object3d).update();
+                }
+                drawObject(Object3d);
+            }
+        }
+       /* for (int i = 0; i < _scene.children().size(); i++) {
             Object3d o = _scene.children().get(i);
             if (o.animationEnabled()) {
                 ((AnimationObject3d) o).update();
             }
             drawObject(o);
-        }
+        }*/
     }
 
     //boolean customResult = o.customRenderer(_gl);
@@ -266,6 +334,7 @@ public class Renderer implements GLSurfaceView.Renderer {
 
 
     protected void drawObject(Object3d $o) {
+
         if ($o.isVisible() == false) return;
 
         // Various per-object settings:
@@ -418,10 +487,16 @@ public class Renderer implements GLSurfaceView.Renderer {
         if ($o instanceof Object3dContainer) {
             Object3dContainer container = (Object3dContainer) $o;
 
-            for (int i = 0; i < container.children().size(); i++) {
+            for (Object3d Object3d : container.children().values()) {
+                if (Object3d != null) {
+                    drawObject(Object3d);
+                }
+            }
+
+           /* for (int i = 0; i < container.children().size(); i++) {
                 Object3d o = container.children().get(i);
                 drawObject(o);
-            }
+            }*/
         }
 
         // Restore matrix
@@ -431,54 +506,56 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     private void drawObject_textures(Object3d $o) {
         // iterate thru object's textures
+        try {
+            for (int i = 0; i < RenderCaps.maxTextureUnits(); i++) {
+                _gl.glActiveTexture(GL10.GL_TEXTURE0 + i);
+                _gl.glClientActiveTexture(GL10.GL_TEXTURE0 + i);
 
-        for (int i = 0; i < RenderCaps.maxTextureUnits(); i++) {
-            _gl.glActiveTexture(GL10.GL_TEXTURE0 + i);
-            _gl.glClientActiveTexture(GL10.GL_TEXTURE0 + i);
+                if ($o.hasUvs() && $o.texturesEnabled()) {
+                    $o.vertices().uvs().FloatBuffer().position(0);
+                    _gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, $o.vertices().uvs().FloatBuffer());
 
-            if ($o.hasUvs() && $o.texturesEnabled()) {
-                $o.vertices().uvs().FloatBuffer().position(0);
-                _gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, $o.vertices().uvs().FloatBuffer());
+                    TextureVo textureVo = ((i < $o.textures().size())) ? textureVo = $o.textures().get(i) : null;
 
-                TextureVo textureVo = ((i < $o.textures().size())) ? textureVo = $o.textures().get(i) : null;
+                    if (textureVo != null) {
+                        // activate texture
+                        int glId = _textureManager.getGlTextureId(textureVo.textureId);
+                        _gl.glBindTexture(GL10.GL_TEXTURE_2D, glId);
+                        _gl.glEnable(GL10.GL_TEXTURE_2D);
+                        _gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 
-                if (textureVo != null) {
-                    // activate texture
-                    int glId = _textureManager.getGlTextureId(textureVo.textureId);
-                    _gl.glBindTexture(GL10.GL_TEXTURE_2D, glId);
-                    _gl.glEnable(GL10.GL_TEXTURE_2D);
-                    _gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+                        int minFilterType = _textureManager.hasMipMap(textureVo.textureId) ? GL10.GL_LINEAR_MIPMAP_NEAREST : GL10.GL_NEAREST;
+                        _gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, minFilterType);
+                        _gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR); // (OpenGL default)
 
-                    int minFilterType = _textureManager.hasMipMap(textureVo.textureId) ? GL10.GL_LINEAR_MIPMAP_NEAREST : GL10.GL_NEAREST;
-                    _gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, minFilterType);
-                    _gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR); // (OpenGL default)
+                        // do texture environment settings
+                        for (int j = 0; j < textureVo.textureEnvs.size(); j++) {
+                            _gl.glTexEnvx(GL10.GL_TEXTURE_ENV, textureVo.textureEnvs.get(j).pname, textureVo.textureEnvs.get(j).param);
+                        }
 
-                    // do texture environment settings
-                    for (int j = 0; j < textureVo.textureEnvs.size(); j++) {
-                        _gl.glTexEnvx(GL10.GL_TEXTURE_ENV, textureVo.textureEnvs.get(j).pname, textureVo.textureEnvs.get(j).param);
-                    }
+                        // texture wrapping settings
+                        _gl.glTexParameterx(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, (textureVo.repeatU ? GL10.GL_REPEAT : GL10.GL_CLAMP_TO_EDGE));
+                        _gl.glTexParameterx(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, (textureVo.repeatV ? GL10.GL_REPEAT : GL10.GL_CLAMP_TO_EDGE));
 
-                    // texture wrapping settings
-                    _gl.glTexParameterx(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, (textureVo.repeatU ? GL10.GL_REPEAT : GL10.GL_CLAMP_TO_EDGE));
-                    _gl.glTexParameterx(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, (textureVo.repeatV ? GL10.GL_REPEAT : GL10.GL_CLAMP_TO_EDGE));
-
-                    // texture offset, if any
-                    if (textureVo.offsetU != 0 || textureVo.offsetV != 0) {
-                        _gl.glMatrixMode(GL10.GL_TEXTURE);
-                        _gl.glLoadIdentity();
-                        _gl.glTranslatef(textureVo.offsetU, textureVo.offsetV, 0);
-                        _gl.glMatrixMode(GL10.GL_MODELVIEW); // .. restore matrixmode
+                        // texture offset, if any
+                        if (textureVo.offsetU != 0 || textureVo.offsetV != 0) {
+                            _gl.glMatrixMode(GL10.GL_TEXTURE);
+                            _gl.glLoadIdentity();
+                            _gl.glTranslatef(textureVo.offsetU, textureVo.offsetV, 0);
+                            _gl.glMatrixMode(GL10.GL_MODELVIEW); // .. restore matrixmode
+                        }
+                    } else {
+                        _gl.glBindTexture(GL10.GL_TEXTURE_2D, 0);
+                        _gl.glDisable(GL10.GL_TEXTURE_2D);
+                        _gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
                     }
                 } else {
                     _gl.glBindTexture(GL10.GL_TEXTURE_2D, 0);
                     _gl.glDisable(GL10.GL_TEXTURE_2D);
                     _gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
                 }
-            } else {
-                _gl.glBindTexture(GL10.GL_TEXTURE_2D, 0);
-                _gl.glDisable(GL10.GL_TEXTURE_2D);
-                _gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
             }
+        } catch (Exception E) {
         }
     }
 

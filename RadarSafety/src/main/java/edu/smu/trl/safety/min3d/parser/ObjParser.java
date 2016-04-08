@@ -7,13 +7,6 @@ package edu.smu.trl.safety.min3d.parser;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.util.Log;
-import edu.smu.trl.safety.min3d.Min3d;
-import edu.smu.trl.safety.min3d.Shared;
-import edu.smu.trl.safety.min3d.Utils;
-import edu.smu.trl.safety.min3d.core.Object3dContainer;
-import edu.smu.trl.safety.min3d.vos.Color4;
-import edu.smu.trl.safety.min3d.vos.Number3d;
-import edu.smu.trl.safety.min3d.vos.Uv;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,6 +14,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Calendar;
 import java.util.StringTokenizer;
+
+import edu.smu.trl.safety.min3d.Min3d;
+import edu.smu.trl.safety.min3d.Shared;
+import edu.smu.trl.safety.min3d.Utils;
+import edu.smu.trl.safety.min3d.core.Object3dContainer;
+import edu.smu.trl.safety.min3d.vos.Color4;
+import edu.smu.trl.safety.min3d.vos.Number3d;
+import edu.smu.trl.safety.min3d.vos.Uv;
 
 /**
  * Parses Wavefront OBJ files. Basic version, this is still a work in progress!
@@ -147,7 +148,7 @@ public class ObjParser extends AParser implements IParser {
         for (int i = 0; i < numObjects; i++) {
             ParseObjectData o = parseObjects.get(i);
             Log.d(Min3d.TAG, "Creating object " + o.name);
-            obj.addChild(o.getParsedObject(materialMap, textureAtlas));
+            obj.addChild(String.format("%d", i), o.getParsedObject(materialMap, textureAtlas));
         }
 
         if (textureAtlas.hasBitmaps()) {
@@ -249,11 +250,16 @@ public class ObjParser extends AParser implements IParser {
                     subParts = new StringTokenizer(parts.nextToken(), "/");
 
                 int index = i - 1;
-                v[index] = (short) (Short.parseShort(subParts.nextToken()) - 1);
+                String Token = subParts.nextToken();
+                try {
+                    v[index] = (Integer.parseInt(Token) - 1);
+                } catch (Exception E) {
+                    int x = 0;
+                }
                 if (hasuv)
-                    uv[index] = (short) (Short.parseShort(subParts.nextToken()) - 1);
+                    uv[index] = (Integer.parseInt(subParts.nextToken()) - 1);
                 if (hasn)
-                    n[index] = (short) (Short.parseShort(subParts.nextToken()) - 1);
+                    n[index] = (Integer.parseInt(subParts.nextToken()) - 1);
             }
         }
     }

@@ -6,6 +6,7 @@ package edu.smu.trl.safety.min3d.Samples;
 
 
 import android.graphics.Bitmap;
+
 import edu.smu.trl.safety.min3d.Shared;
 import edu.smu.trl.safety.min3d.Utils;
 import edu.smu.trl.safety.min3d.core.Object3dContainer;
@@ -42,7 +43,7 @@ public class ExampleAnimatingVertices extends RendererActivity {
         _plane = new Rectangle(w, h, 1, 1, new Color4());
         _plane.doubleSidedEnabled(true); // ... so that the back of the plane is visible
         _plane.normalsEnabled(false);
-        scene.addChild(_plane);
+        scene.addChild("Plane", _plane);
 
         Shared.textureManager().addTextureId(b, "mickey", false);
         _plane.textures().addById("mickey");

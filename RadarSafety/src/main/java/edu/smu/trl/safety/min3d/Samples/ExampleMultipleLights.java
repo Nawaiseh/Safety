@@ -57,7 +57,7 @@ public class ExampleMultipleLights extends RendererActivity {
 
         _sphere = new Sphere(1.0f, 20, 15);
         _sphere.vertexColorsEnabled(false);
-        scene.addChild(_sphere);
+        scene.addChild("Sphere", _sphere);
 
         // Boxes, displayed just as a visualization aid
 
@@ -65,19 +65,19 @@ public class ExampleMultipleLights extends RendererActivity {
         _boxRed.normalsEnabled(false);
         _boxRed.vertexColorsEnabled(false);
         _boxRed.defaultColor().setAll(0xaaff0000);
-        scene.addChild(_boxRed);
+        scene.addChild("RedBox", _boxRed);
 
         _boxGreen = new Box(0.07f, 0.07f, 0.07f);
         _boxGreen.normalsEnabled(false);
         _boxGreen.vertexColorsEnabled(false);
         _boxGreen.defaultColor().setAll(0xaa00ff00);
-        scene.addChild(_boxGreen);
+        scene.addChild("GreenBox", _boxGreen);
 
         _boxBlue = new Box(0.05f, 0.05f, 0.05f);
         _boxBlue.normalsEnabled(false);
         _boxBlue.vertexColorsEnabled(false);
         _boxBlue.defaultColor().setAll(0xaa0000ff);
-        scene.addChild(_boxBlue);
+        scene.addChild("BlueBox", _boxBlue);
 
         _count = 0;
     }

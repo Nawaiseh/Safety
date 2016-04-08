@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="edu.smu.trl.safety.radarsafety.Renderer_Activity">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <!--        <android.support.v7.widget.Toolbar
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:background="?attr/colorPrimary"
+                    app:popupTheme="@style/AppTheme.PopupOverlay" />-->
+
+    </android.support.design.widget.AppBarLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#b7b072"
+        android:backgroundTint="#14a61616"
+        android:backgroundTintMode="src_over"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="200dp"
+            android:layout_height="match_parent"
+            android:background="#fffce1"
+            android:backgroundTint="#14a61616"
+            android:backgroundTintMode="src_over"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#fffce1"
+                android:backgroundTint="#14a61616"
+                android:backgroundTintMode="src_over"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/ConnectionStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+
+                    android:background="#fffce1"
+                    android:clickable="false"
+                    android:elevation="@dimen/abc_action_bar_progress_bar_size"
+                    android:enabled="true"
+                    android:gravity="center_horizontal"
+                    android:padding="5dp"
+                    android:text="@string/connection_status"
+                    android:textAlignment="center"
+                    android:textColor="#000000"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="200dp"
+                android:layout_height="match_parent"
+                android:background="#fffce1"
+                android:backgroundTint="#2cd02222"
+                android:backgroundTintMode="src_over"
+                android:orientation="vertical">
+
+                <ListView
+                    android:id="@+id/ListView"
+                    android:layout_width="fill_parent"
+                    android:layout_height="match_parent"
+                    android:paddingEnd="1dp"
+                    android:paddingStart="1dp"
+                    android:scrollingCache="true"
+                    android:smoothScrollbar="true"
+                    android:stackFromBottom="true"
+                    android:touchscreenBlocksFocus="true"
+                    android:transitionGroup="true">
+
+
+                </ListView>
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#fffce1"
+            android:backgroundTint="#145ea616"
+            android:backgroundTintMode="src_over"
+            android:orientation="horizontal">
+
+            <include layout="@layout/content_renderer_" />
+        </LinearLayout>
+    </LinearLayout>
+
+
+</android.support.design.widget.CoordinatorLayout>

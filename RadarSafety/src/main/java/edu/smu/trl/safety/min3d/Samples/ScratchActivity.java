@@ -5,6 +5,7 @@ package edu.smu.trl.safety.min3d.Samples;
  */
 
 import android.widget.LinearLayout;
+
 import edu.smu.trl.safety.min3d.core.Object3dContainer;
 import edu.smu.trl.safety.min3d.core.RendererActivity;
 import edu.smu.trl.safety.min3d.objectPrimitives.Box;
@@ -48,19 +49,19 @@ public class ScratchActivity extends RendererActivity {
         scene.lights().add(_light);
 
         _o1 = new Box(1f, 1f, 1f);
-        scene.addChild(_o1);
+        scene.addChild("Box1", _o1);
 
         _o2 = new Sphere(0.5f, 10, 10);
         _o2.position().x = 1.0f;
-        _o1.addChild(_o2);
+        _o1.addChild("Sphere1", _o2);
 
         _o3 = new Sphere(0.5f, 10, 10);
         _o3.position().x = 0.75f;
-        _o2.addChild(_o3);
+        _o2.addChild("Sphere2", _o3);
 
         _k = _o1.clone();
         _k.position().y = -2f;
-        scene.addChild(_k);
+        scene.addChild("Box2", _k);
     }
 
     @Override
