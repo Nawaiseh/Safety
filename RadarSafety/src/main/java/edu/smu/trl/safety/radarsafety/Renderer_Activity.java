@@ -5,10 +5,13 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
@@ -23,9 +26,15 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Timer;
 import java.util.TreeMap;
 
 import edu.smu.trl.safety.bluetooth.BluetoothChatService;
@@ -58,8 +67,12 @@ public class Renderer_Activity extends AppCompatActivity {
     public SoundAnimation SoundAnimation;
     protected PowerManager.WakeLock WakeLock;
     TextView TextView;
+    java.io.FileOutputStream FileOutputStream = null;
+    java.text.SimpleDateFormat SimpleDateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss.SSS");
     private ListView BluetoothChatView;
     private ArrayAdapter<String> BluetoothChatArrayAdapter;
+
+    //  Writer.write(textmsg.getText().toString());
     private String ConnectedDeviceName = null;
     public final Handler MessageHandler = new Handler() {
         public void handleMessage(Message Message) {
@@ -444,12 +457,68 @@ public class Renderer_Activity extends AppCompatActivity {
     //</editor-fold>
 
 
+    protected void onDraw(Canvas Canvas) {
+
+    }
+
+    private void SendFileToEmail(String FileName, String Path, String EmailTo, String Subject) {
+
+        File File = new File(Path, FileName);
+        if (File.exists()) {
+            try {
+                Uri FileUri = Uri.fromFile(File);
+                Intent EmailIntent = new Intent(Intent.ACTION_SEND);
+                EmailIntent.setType("vnd.android.cursor.dir/email");
+                EmailIntent.putExtra(Intent.EXTRA_EMAIL, EmailTo);
+                EmailIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(File.getAbsolutePath()));
+                EmailIntent.putExtra(Intent.EXTRA_SUBJECT, Subject);
+                startActivity(Intent.createChooser(EmailIntent, "Send Email..."));
+
+            } catch (Exception Exception) {
+                Exception.printStackTrace();
+                int x = 0;
+            }
+        }
+    }
+
+    /* final private int REQUEST_CODE_ASK_PERMISSIONS = 123;
+     private void AskForPermissions(String [] Permissions){
+         List<String> NeededPermissions = new ArrayList<>();
+         for(String Permission : Permissions) {
+             int WritePermission = this.checkSelfPermission(Permission);
+             if (WritePermission != PackageManager.PERMISSION_GRANTED) {
+                 NeededPermissions.add(Permission);
+             }
+         }
+
+         String [] RequestestPermissions = NeededPermissions.toArray(new String[NeededPermissions.size()]);
+         if (RequestestPermissions!= null && RequestestPermissions.length>0) {
+             requestPermissions(RequestestPermissions, REQUEST_CODE_ASK_PERMISSIONS);
+         }
+     }*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_renderer_);
         MyCar.Type = Car.CarType.MyCar;
         BluetoothChatView = (ListView) this.findViewById(R.id.ListView);
+
+
+        String[] PermissionsToCheck = new String[]{
+                android.Manifest.permission.BLUETOOTH_ADMIN,
+                android.Manifest.permission.BLUETOOTH,
+                android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+                android.Manifest.permission.WRITE_SETTINGS,
+                android.Manifest.permission.WAKE_LOCK,
+                android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+        };
+        //   AskForPermissions(PermissionsToCheck);
+
+        String DocumentsPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).getAbsolutePath();
+        //  SendFileToEmail("Bluetooth_Data.txt",DocumentsPath, "nawaiseh@gmail.com", "Bluetooth_Data.txt");
+        //  SendFileToEmail("UI_Data.txt", DocumentsPath, "nawaiseh@gmail.com", "Bluetooth_Data.txt");
+
 
         BluetoothChatView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
         final PowerManager pm = (PowerManager) getSystemService(this.POWER_SERVICE);
@@ -467,7 +536,7 @@ public class Renderer_Activity extends AppCompatActivity {
         AlerColor = getResources().getColor(R.color.normal_color);
         UsedColor = NormalColor;
 
-
+        //Layout.onDrawForeground();
         if (BluetoothAdapter == null) {
             BluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             if (BluetoothAdapter == null) {
@@ -476,30 +545,16 @@ public class Renderer_Activity extends AppCompatActivity {
             }
         }
 
-      /*  Display display = getWindowManager().getDefaultDisplay();
-        int width = display.getWidth()-100;
-        int height = display.getHeight() - 20;
-*/
+
         Layout.addView(new MyView(this));
-
-
-/*
-
-
-        Cars.put("Car1", new Car());
-        Cars.put("Car2", new Car());
-
-        MyCar.Location.x = 50;
-        MyCar.Location.y = 50;
-
-        Cars.get("Car1").Location.x = 100;
-        Cars.get("Car1").Location.y = 150;
-
-        Cars.get("Car2").Location.x = 100;
-        Cars.get("Car2").Location.y = 50;*/
     }
 
     public class MyView extends View {
+        public final Handler ViewMessageHandler = new Handler() {
+            public void handleMessage(Message Message) {
+                invalidate();
+            }
+        };
         Paint BackGroundPaint = new Paint();
         Paint MyCarPaint = new Paint();
         Paint OtherCarPaint = new Paint();
@@ -507,9 +562,32 @@ public class Renderer_Activity extends AppCompatActivity {
         Number3d OtherCarLocation = new Number3d();
         Typeface Typeface;
         ArrayList<Car> OutDatedCars = new ArrayList<>();
+        Timer Timer = new Timer();
+        TimerTask TimerTask = new TimerTask(this);
+        OutputStreamWriter Writer;
 
         public MyView(Context context) {
             super(context);
+
+
+            try {
+                File Path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
+                boolean PathExist = Path.exists();
+                if (!PathExist) {
+                    PathExist = Path.mkdirs();
+                    Path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
+                    int x = 0;
+                }
+                if (PathExist) {
+                    FileOutputStream = new FileOutputStream(new File(Path, "UI_Data.txt"));
+                    Writer = new OutputStreamWriter(FileOutputStream);
+                } else {
+
+                }
+            } catch (Exception Exception) {
+                Exception.printStackTrace();
+                Log.e(TAG, "Exception", Exception);
+            }
 
 
             this.Typeface = Typeface.createFromAsset(getAssets(), "Roboto-Regular.ttf");
@@ -528,14 +606,25 @@ public class Renderer_Activity extends AppCompatActivity {
             MyCarPaint.setColor(getResources().getColor(R.color.MyCar_color));
 
             MyCarPaint.setTypeface(this.Typeface);
-
             OtherCarPaint.setStyle(Paint.Style.FILL);
             OtherCarPaint.setTypeface(this.Typeface);
             OtherCarPaint.setColor(getResources().getColor(R.color.OtherCars_color));
+
+            //  Timer.schedule(TimerTask, 0, 5);
         }
 
         private void DrawRectangle(Canvas Canvas, Paint Paint, Number3d Location) {
             Canvas.drawRect(Location.x - 10, Location.y - 20, Location.x + 10, Location.y + 20, Paint);
+        }
+
+        public void onConfigurationChanged(Configuration newConfig) {
+            super.onConfigurationChanged(newConfig);
+
+            if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                Log.e(TAG, "ORIENTATION_LANDSCAPE");
+            } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                Log.e(TAG, "ORIENTATION_PORTRAIT");
+            }
         }
 
         @Override
@@ -544,75 +633,103 @@ public class Renderer_Activity extends AppCompatActivity {
             String Message;
             float MinDistance = Float.MAX_VALUE;
             super.onDraw(Canvas);
-            try {
-                long TimeNow = System.currentTimeMillis();
+            if (Cars.isEmpty()) {
+                invalidate();
 
-                Center.x = getWidth() / 2F;
-                Center.y = getHeight() / 2F;
-                Canvas.drawPaint(BackGroundPaint);
-
-
-                DrawRectangle(Canvas, MyCarPaint, Center);
-                int Y = 20;
-                //Canvas.drawText("MyCar[" + MyCar.ID + "] @ (" + MyCar.OpenGLLocation.x + " , " + MyCar.OpenGLLocation.y + ")", 5, Y, MyCarPaint);
-                if (MyCar != null && MyCar.ID != null) {
-                    Canvas.drawText(String.format("[%s] Located @ (%.2f , %.2f )", MyCar.ID, MyCar.OpenGLLocation.x, MyCar.OpenGLLocation.y), 5, Y, MyCarPaint);
-                }
-                Y += 20;
-                Log.i(TAG, String.format("MyCar:- %s", Center.toString()));
-                for (Car Car : Cars.values()) {
-
-                    if (MinDistance > Car.DistanceInMeters) {
-                        MinDistance = Car.DistanceInMeters;
-                    }
-                    if ((TimeNow - Car.LastUpdated) > _LastUpdateThreashold) {
-                        OutDatedCars.add(Car);
-                    } else {
-                        OtherCarLocation.x = Center.x + ((Car.OpenGLLocation.x - MyCar.OpenGLLocation.x) * 3);
-                        OtherCarLocation.y = Center.y + ((Car.OpenGLLocation.y - MyCar.OpenGLLocation.y) * 3);
-
-
-                        Log.i(TAG, String.format("OtherCar:- %s", OtherCarLocation.toString()));
-                        DrawRectangle(Canvas, OtherCarPaint, OtherCarLocation);
-                        if (Car != null && Car.ID != null) {
-                            Canvas.drawText(String.format("[%s] Located @ (%.2f , %.2f ) Distance = %.3f", Car.ID, Car.OpenGLLocation.x, Car.OpenGLLocation.y, Car.DistanceInMeters), 5, Y, OtherCarPaint);
-                        }
-                        Y += 20;
-                    }
-                }
-
-
-                if (MinDistance <= BluetoothChatService.ThreasholdDistance) {
-                    Message = String.format("Alert!:- A Car is Closer than %d", BluetoothChatService.ThreasholdDistance);
-                    BluetoothChatService.MessageHandler.obtainMessage(Constants.PLAY_ALERT_SOUND, Message.length(), -1, Message).sendToTarget();
-                    BluetoothChatService.LastUpdate = System.currentTimeMillis();
-                } else {
-
-                    Message = String.format("Cars Are Far Enough");
-                    BluetoothChatService.MessageHandler.obtainMessage(Constants.STOP_ALERT_SOUND, Message.length(), -1, Message).sendToTarget();
-                }
-                for (Car Car : OutDatedCars) {
-                    Cars.remove(Car.ID);
-                }
-                if (Cars.isEmpty()) {
-                    // if (BluetoothChatService.AlertIsGoing) {
-                    edu.smu.trl.safety.bluetooth.BluetoothChatService.AlertIsGoing = false;
-                    //  BluetoothChatArrayAdapter.add("Cars Are Far Enough Now");
-                    StopColorAnimation(Layout, ValueAnimator, NormalColor);
-                    //   }
-                }
-                OutDatedCars.clear();
+            } else {
+                //   synchronized (Lock) {
                 try {
-                    Thread.sleep(30);
-                } catch (InterruptedException e) {
-                    Log.i(TAG, "Error");
+                    long TimeNow = System.currentTimeMillis();
+                    Calendar _Calendar = Calendar.getInstance();
+                    String TimeString = SimpleDateFormat.format(_Calendar.getTime());
+                    Center.x = getWidth() / 2F;
+                    Center.y = getHeight() / 2F;
+                    Canvas.drawPaint(BackGroundPaint);
+
+
+                    DrawRectangle(Canvas, MyCarPaint, Center);
+                    int Y = 20;
+                    //Canvas.drawText("MyCar[" + MyCar.ID + "] @ (" + MyCar.OpenGLLocation.x + " , " + MyCar.OpenGLLocation.y + ")", 5, Y, MyCarPaint);
+                    if (MyCar != null && MyCar.ID != null) {
+                        String Msg = String.format("[%s] Located @ (%.2f , %.2f ) Distance = %.3f, Speed = %.2f M/H", MyCar.ID, MyCar.Location.x, MyCar.Location.y, MyCar.DistanceInMeters, MyCar.Speed);
+                        Canvas.drawText(Msg, 5, Y, MyCarPaint);
+                        if (Writer != null) {
+                            Writer.write(String.format("%s:\t%s\n", SimpleDateFormat.format(_Calendar.getTime()), Msg.replace(",", "\t").replace("@", "@\t").replace("=", "=\t")));
+                        }
+                    }
+                    Y += 20;
+                    Log.i(TAG, String.format("MyCar:- %s", Center.toString()));
+
+
+                    for (Car Car : Cars.values()) {
+
+                        if (MinDistance > Car.DistanceInMeters) {
+                            MinDistance = Car.DistanceInMeters;
+                        }
+                        if ((TimeNow - Car.LastUpdated) > _LastUpdateThreashold) {
+                            OutDatedCars.add(Car);
+                        } else {
+                            OtherCarLocation.x = Center.x + ((Car.OpenGLLocation.x - MyCar.OpenGLLocation.x) * 3);
+                            OtherCarLocation.y = Center.y + ((Car.OpenGLLocation.y - MyCar.OpenGLLocation.y) * 3);
+
+
+                            Log.i(TAG, String.format("OtherCar:- %s", OtherCarLocation.toString()));
+                            DrawRectangle(Canvas, OtherCarPaint, OtherCarLocation);
+                            if (Car != null && Car.ID != null) {
+                                String Msg = String.format("[%s] Located @ (%.2f , %.2f ) Distance = %.3f, Speed = %.2f M/H", Car.ID, Car.Location.x, Car.Location.y, Car.DistanceInMeters, Car.Speed);
+                                if (Writer != null) {
+                                    Writer.write(String.format("%s:\t%s\n", SimpleDateFormat.format(_Calendar.getTime()), Msg.replace(",", "\t").replace("@", "@\t").replace("=", "=\t")));
+                                }
+                                Canvas.drawText(Msg, 5, Y, OtherCarPaint);
+                            }
+                            Y += 20;
+                        }
+                    }
+
+
+                    if (MinDistance <= BluetoothChatService.ThreasholdDistance) {
+                        Message = String.format("Alert!:- A Car is Closer than %d", BluetoothChatService.ThreasholdDistance);
+                        MessageHandler.obtainMessage(Constants.PLAY_ALERT_SOUND, Message.length(), -1, Message).sendToTarget();
+                        BluetoothChatService.LastUpdate = System.currentTimeMillis();
+                    } else {
+
+                        Message = String.format("Cars Are Far Enough");
+                        MessageHandler.obtainMessage(Constants.STOP_ALERT_SOUND, Message.length(), -1, Message).sendToTarget();
+                    }
+                    for (Car Car : OutDatedCars) {
+                        Cars.remove(Car.ID);
+                    }
+                    if (Cars.isEmpty()) {
+                        // if (BluetoothChatService.AlertIsGoing) {
+                        edu.smu.trl.safety.bluetooth.BluetoothChatService.AlertIsGoing = false;
+                        //  BluetoothChatArrayAdapter.add("Cars Are Far Enough Now");
+                        StopColorAnimation(Layout, ValueAnimator, NormalColor);
+                        //   }
+                    }
+                    OutDatedCars.clear();
+
+
+                } catch (Exception Exception) {
+                    Exception.printStackTrace();
+
+                    Log.e(TAG, "Error", Exception);
                 }
-
-                invalidate();  // Force a re-draw
-
-            } catch (Exception e) {
-                Log.i(TAG, "Error");
+                invalidate();
             }
         }
+
+        class TimerTask extends java.util.TimerTask {
+            final private MyView MyView;
+
+            public TimerTask(MyView MyView) {
+                this.MyView = MyView;
+            }
+
+            @Override
+            public void run() {
+                ViewMessageHandler.obtainMessage(1).sendToTarget();
+            }
+        }
+        // }
     }
 }

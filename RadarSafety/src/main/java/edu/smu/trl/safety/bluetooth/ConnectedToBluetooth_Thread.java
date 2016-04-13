@@ -5,11 +5,17 @@ package edu.smu.trl.safety.bluetooth;
  */
 
 import android.bluetooth.BluetoothSocket;
+import android.os.Environment;
 import android.os.SystemClock;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import edu.smu.trl.safety.radarsafety.Car;
 import edu.smu.trl.safety.radarsafety.Car.DistanceUnit;
@@ -51,6 +57,10 @@ public class ConnectedToBluetooth_Thread extends Thread {
         }
     }
 
+    private static String ExtractID(byte[] Blob, Car.CarType _CarType) {
+        return Car.BytesToHEX(Blob, ((_CarType == Car.CarType.MyCar) ? 1 : 39), 4).trim();
+    }
+
     private String BluetoothMessageAsString(byte[] Bluetooth_Message) {
         String Result = String.format("%s\n%s", Car.BytesToHEX(Bluetooth_Message, 0, 38).trim(), Car.BytesToHEX(Bluetooth_Message, 38, 38).trim());
         return Result;
@@ -65,6 +75,30 @@ public class ConnectedToBluetooth_Thread extends Thread {
         float N2 = 4294967296L;
         Car OtherCar = new Car();
 
+
+        FileOutputStream FileOutputStream = null;
+        OutputStreamWriter Writer = null;
+        try {
+            File Path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            boolean PathExist = Path.exists();
+            if (!PathExist) {
+                PathExist = Path.mkdirs();
+                Path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                int x = 0;
+            }
+            if (PathExist) {
+                FileOutputStream = new FileOutputStream(new File(Path, "Bluetooth_Data.txt"), true);
+                Writer = new OutputStreamWriter(FileOutputStream);
+            } else {
+
+            }
+        } catch (Exception Exception) {
+            Exception.printStackTrace();
+            Log.e(TAG, "Exception", Exception);
+        }
+
+        SimpleDateFormat SimpleDateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss.SSS");
+
         while (true) {
 
             try {
@@ -76,46 +110,57 @@ public class ConnectedToBluetooth_Thread extends Thread {
                             String Bluetooth_MessageAsString = BluetoothMessageAsString(Bluetooth_Message);
                             Log.i(TAG, "NumberOfBytes:- " + NumberOfBytes);
                             String Message = "";
-                            synchronized (Lock) {
-                                try {
-                                    boolean Different = false;
-                                    for (int i = 1; i < 5; i++) {
-                                        if (Bluetooth_Message[i] != Bluetooth_Message[i + 38]) {
-                                            Different = true;
+                            //   synchronized (Lock) {
+                            try {
+                                boolean Different = false;
+                                for (int i = 1; i < 5; i++) {
+                                    if (Bluetooth_Message[i] != Bluetooth_Message[i + 38]) {
+                                        Different = true;
 
-                                            break;
-                                        }
+                                        break;
                                     }
-                                    if (!Different) {
-                                        continue;
-                                    }
-                                    MyCar.SetData(Bluetooth_Message);
-                                    OtherCar.SetData(Bluetooth_Message);
+                                }
+                                if (!Different) {
+                                    continue;
+                                }
+                                String OtherCarID = ExtractID(Bluetooth_Message, Car.CarType.OtherCar);
+                                if (BluetoothChatService.Renderer_Activity.Cars.containsKey(OtherCarID)) {
+                                    OtherCar = BluetoothChatService.Renderer_Activity.Cars.get(OtherCarID);
+                                } else {
+                                    OtherCar = new Car();
+                                    BluetoothChatService.Renderer_Activity.Cars.put(OtherCarID, OtherCar);
+                                }
+                                MyCar.SetData(Bluetooth_Message);
+                                OtherCar.SetData(Bluetooth_Message);
 
-                                    OtherCar.DistanceInMeters = OtherCar.DistanceFrom(MyCar, DistanceUnit.Meters);
-                                    Message = String.format("Me:- %s\n OtherCar:- %s\nDistance = %.1f Meters",
-                                            MyCar.Position(Car.PositionType.NoAltitude), OtherCar.Position(Car.PositionType.NoAltitude), OtherCar.DistanceInMeters);
+                                OtherCar.DistanceInMeters = OtherCar.DistanceFrom(MyCar, DistanceUnit.Meters);
+                                Message = String.format("Me:- %s\n OtherCar:- %s\nDistance = %.1f Meters",
+                                        MyCar.Position(Car.PositionType.NoAltitude), OtherCar.Position(Car.PositionType.NoAltitude), OtherCar.DistanceInMeters);
 
-
-                                    BluetoothChatService.MessageHandler.obtainMessage(Constants.MESSAGE_READ, Message.length(), -1, Message).sendToTarget();
-
-
-                                    if (BluetoothChatService.Renderer_Activity.Cars.containsKey(OtherCar.ID)) {
-                                        BluetoothChatService.Renderer_Activity.Cars.get(OtherCar.ID).SetData(OtherCar);
-                                    } else {
-
-                                        BluetoothChatService.Renderer_Activity.Cars.put(OtherCar.ID, OtherCar);
-
-
-                                        OtherCar = new Car();
-                                    }
-
-                                    OtherCar.OpenGLLocation.x = OtherCar.Location.x - MyCar.Location.x;
-                                    OtherCar.OpenGLLocation.y = OtherCar.Location.x - MyCar.Location.y;
-                                    OtherCar.OpenGLLocation.z = OtherCar.Location.z - MyCar.Location.z;
+                                if (Writer != null) {
+                                    Calendar _Calendar = Calendar.getInstance();
+                                    Writer.write(String.format("%s:\t%s\n", SimpleDateFormat.format(_Calendar.getTime()), Message.replace("\n", "\t")));
+                                    Writer.flush();
+                                }
+                                BluetoothChatService.MessageHandler.obtainMessage(Constants.MESSAGE_READ, Message.length(), -1, Message).sendToTarget();
 
 
-                                    OtherCar.OpenGLRotation.z = OtherCar.Direction - MyCar.Direction;
+                               /* if (BluetoothChatService.Renderer_Activity.Cars.containsKey(OtherCar.ID)) {
+                                    BluetoothChatService.Renderer_Activity.Cars.get(OtherCar.ID).SetData(OtherCar);
+                                } else {
+
+                                    BluetoothChatService.Renderer_Activity.Cars.put(OtherCar.ID, OtherCar);
+
+
+                                    OtherCar = new Car();
+                                }*/
+
+                                OtherCar.OpenGLLocation.x = OtherCar.Location.x - MyCar.Location.x;
+                                OtherCar.OpenGLLocation.y = OtherCar.Location.x - MyCar.Location.y;
+                                OtherCar.OpenGLLocation.z = OtherCar.Location.z - MyCar.Location.z;
+
+
+                                OtherCar.OpenGLRotation.z = OtherCar.Direction - MyCar.Direction;
 
 
 
@@ -128,12 +173,12 @@ public class ConnectedToBluetooth_Thread extends Thread {
                                 BluetoothChatService.MessageHandler.obtainMessage(Constants.STOP_ALERT_SOUND, Message.length(), -1, Message).sendToTarget();
                             }*/
 
-                                } catch (Exception Exception) {
-                                    Log.e(TAG, "Disconnected", Exception);
-                                    Log.e(TAG, "Exception", Exception);
-                                }
-
+                            } catch (Exception Exception) {
+                                Log.e(TAG, "Disconnected", Exception);
+                                Log.e(TAG, "Exception", Exception);
                             }
+
+                            //    }
                         } else {
                             Log.e(TAG, "Exception:- Number of Bytes <> 76");
                             int x = 0;

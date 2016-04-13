@@ -7,12 +7,24 @@
     <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
+
+        <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+        <uses-permission android:name="android.permission.BLUETOOTH" />
+        <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED" />
+        <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+        <uses-permission android:name="android.permission.WAKE_LOCK" />
+        <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+        <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
         <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleAccelerometer" />
         <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleAnimatedTexture" />
         <activity android:name="edu.smu.trl.safety.min3d.Samples.ExampleAnimatingVertices" />
@@ -46,6 +58,7 @@
         <activity android:name="edu.smu.trl.safety.min3d.Samples.ScratchActivity" />
         <activity
             android:name=".Renderer_Activity"
+            android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_renderer_">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
